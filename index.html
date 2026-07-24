@@ -601,12 +601,17 @@ const Store = {
   _ready: false,
 
   async init() {
+    // 加超时：IndexedDB 3秒打不开就跳过（解决手机浏览器卡死问题）
     try {
-      this._db = await this._openDB();
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('IndexedDB超时')), 3000)
+      );
+      this._db = await Promise.race([this._openDB(), timeout]);
       this._ready = true;
     } catch(e) {
-      console.warn('IndexedDB不可用，回退到localStorage', e);
+      console.warn('IndexedDB不可用或超时，回退到localStorage', e);
       this._ready = false;
+      this._db = null;
     }
   },
 
@@ -639,9 +644,14 @@ const Store = {
   },
 
   _getStore(name, mode = 'readonly') {
-    if (!this._db) return null;
-    const tx = this._db.transaction(name, mode);
-    return tx.objectStore(name);
+    if (!this._db || !this._ready) return null;
+    try {
+      const tx = this._db.transaction(name, mode);
+      return tx.objectStore(name);
+    } catch(e) {
+      console.warn('获取存储对象失败:', e);
+      return null;
+    }
   },
 
   async get(store, key) {
@@ -985,8 +995,25 @@ function formatDate(ts) {
 // 启动
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-  await App.init();
-  navigate('home');
+  try {
+    await App.init();
+    await navigate('home');
+  } catch(e) {
+    console.error('UU模拟器初始化失败:', e);
+    // 即使初始化失败，也要显示页面内容
+    const loading = document.getElementById('page-loading');
+    if (loading) {
+      loading.innerHTML = `
+        <div style="text-align:center;padding:40px 20px">
+          <div style="font-size:48px;margin-bottom:16px">🐉</div>
+          <h2>加载遇到点小问题</h2>
+          <p style="color:var(--text-muted);margin:12px 0">${e.message || '未知错误'}</p>
+          <p style="color:var(--text-muted);font-size:13px">但别担心，核心功能还可以用</p>
+          <button class="btn btn-primary" style="margin-top:16px" onclick="navigate('home')">进入首页</button>
+        </div>`;
+      loading.style.display = 'flex';
+    }
+  }
 });
 </script>
 <script>/* ========================================
