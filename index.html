@@ -4,7 +4,499 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>UU模拟器 - AI驱动文字冒险游戏平台</title>
-<link rel="stylesheet" href="css/style.css">
+<style>/* ========================================
+   UU模拟器 - 完整游戏风格UI
+   主题：龙族 · 暗色奇幻
+   ======================================== */
+
+/* === 全局重置 & 变量 === */
+:root {
+  --bg-primary: #0a0a14;
+  --bg-secondary: #12121f;
+  --bg-card: #1a1a2e;
+  --bg-card-hover: #222240;
+  --bg-input: #16213e;
+  --border-color: #2a2a4a;
+  --border-glow: #4a4a8a;
+  --text-primary: #e0e0f0;
+  --text-secondary: #9090b0;
+  --text-muted: #606080;
+  --accent-gold: #d4a843;
+  --accent-red: #cc3333;
+  --accent-blue: #3366cc;
+  --accent-green: #33aa55;
+  --accent-purple: #8844aa;
+  --accent-cyan: #33cccc;
+  --danger: #ff4444;
+  --success: #44cc66;
+  --warning: #ffaa33;
+  --info: #4488ff;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --transition: all 0.3s ease;
+  --font-main: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 15px;
+}
+a { color: var(--accent-gold); text-decoration: none; cursor: pointer; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+input, textarea, select { font-family: inherit; font-size: inherit; }
+ul { list-style: none; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+/* === 导航栏 === */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 56px; background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 1000;
+  display: flex; align-items: center;
+}
+.nav-inner {
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; user-select: none;
+}
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent-gold), #8b6914);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 16px; color: #fff;
+}
+.brand-text { font-size: 20px; font-weight: 700; color: var(--accent-gold); letter-spacing: 2px; }
+.nav-links { display: flex; gap: 8px; }
+.nav-link {
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  color: var(--text-secondary); font-size: 14px;
+  transition: var(--transition);
+}
+.nav-link:hover { background: var(--bg-card); color: var(--text-primary); text-decoration: none; }
+.nav-link.active { background: var(--bg-card); color: var(--accent-gold); }
+.nav-auth { display: flex; align-items: center; gap: 12px; }
+.user-menu { position: relative; cursor: pointer; }
+.user-name { color: var(--accent-gold); font-size: 14px; }
+.user-dropdown {
+  position: absolute; top: 100%; right: 0; margin-top: 8px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); min-width: 140px;
+  display: none; overflow: hidden;
+}
+.user-menu:hover .user-dropdown { display: block; }
+.user-dropdown a {
+  display: block; padding: 10px 16px; color: var(--text-secondary);
+  font-size: 13px; transition: var(--transition);
+}
+.user-dropdown a:hover { background: var(--bg-card-hover); color: var(--text-primary); text-decoration: none; }
+
+/* === 按钮系统 === */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500; transition: var(--transition);
+}
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; }
+.btn-full { width: 100%; }
+.btn-primary { background: var(--accent-gold); color: #1a1a2e; }
+.btn-primary:hover { background: #e8bc50; transform: translateY(-1px); }
+.btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-glow); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #ff5555; }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { background: var(--bg-card); color: var(--text-primary); }
+.btn-choice {
+  width: 100%; text-align: left; padding: 14px 20px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); color: var(--text-primary);
+  font-size: 14px; line-height: 1.5; margin-bottom: 10px;
+  transition: var(--transition);
+}
+.btn-choice:hover {
+  background: var(--bg-card-hover); border-color: var(--accent-gold);
+  transform: translateX(4px); box-shadow: 0 2px 12px rgba(212,168,67,0.15);
+}
+.btn-choice .hint { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.btn-choice.selected { border-color: var(--accent-gold); background: rgba(212,168,67,0.1); }
+
+/* === 弹窗 === */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 2000; display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--bg-secondary); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); width: 90%; max-width: 520px;
+  max-height: 85vh; overflow: hidden;
+  animation: slideUp 0.25s ease;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-wide { max-width: 1000px; }
+.modal-sm { max-width: 400px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--border-color);
+}
+.modal-header h2 { font-size: 18px; font-weight: 600; }
+.modal-header-actions { display: flex; gap: 8px; align-items: center; }
+.modal-close { font-size: 24px; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
+.modal-close:hover { color: var(--text-primary); }
+.modal-body { padding: 24px; overflow-y: auto; max-height: calc(85vh - 60px); }
+
+/* === 表单 === */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 10px 14px;
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  transition: var(--transition);
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--accent-gold); outline: none; box-shadow: 0 0 0 2px rgba(212,168,67,0.15);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+
+/* === 认证弹窗 === */
+.auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+.auth-tab {
+  flex: 1; padding: 10px; text-align: center;
+  background: none; color: var(--text-muted); font-size: 14px;
+  border-bottom: 2px solid transparent; transition: var(--transition);
+}
+.auth-tab.active { color: var(--accent-gold); border-bottom-color: var(--accent-gold); }
+.auth-tab:hover { color: var(--text-secondary); }
+
+/* === 页面容器 === */
+.page { display: none; padding: 80px 24px 24px; min-height: 100vh; }
+.page.active { display: block; }
+.page-header {
+  text-align: center; margin-bottom: 32px;
+  max-width: 1400px; margin-left: auto; margin-right: auto;
+}
+.page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.page-header p { color: var(--text-secondary); font-size: 14px; }
+.page-content { max-width: 1400px; margin: 0 auto; }
+
+/* === 首页 === */
+.hero {
+  text-align: center; padding: 60px 20px 40px;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-primary) 100%);
+  border-radius: var(--radius-lg); margin-bottom: 40px;
+}
+.hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+.hero h1 span { color: var(--accent-gold); }
+.hero p { color: var(--text-secondary); font-size: 16px; max-width: 600px; margin: 0 auto 24px; }
+.featured-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px; margin-top: 24px;
+}
+
+/* === 游戏卡片 === */
+.game-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); overflow: hidden;
+  transition: var(--transition); cursor: pointer;
+}
+.game-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--border-glow); }
+.game-card-banner {
+  height: 140px; background: linear-gradient(135deg, #1a1a3e, #2a1a2e);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; position: relative; overflow: hidden;
+}
+.game-card-banner .overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(0deg, var(--bg-card) 0%, transparent 60%);
+}
+.game-card-body { padding: 16px; }
+.game-card-body h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.game-card-body p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.game-card-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-top: 1px solid var(--border-color);
+  font-size: 12px; color: var(--text-muted);
+}
+.game-card-meta .tag {
+  padding: 2px 8px; border-radius: 4px; font-size: 11px;
+  background: rgba(212,168,67,0.15); color: var(--accent-gold);
+}
+
+/* === 角色创建 === */
+.creation-steps {
+  display: flex; gap: 8px; margin-bottom: 32px; justify-content: center;
+}
+.step {
+  padding: 8px 20px; border-radius: 20px; font-size: 13px;
+  background: var(--bg-card); color: var(--text-muted);
+  transition: var(--transition);
+}
+.step.active { background: var(--accent-gold); color: #1a1a2e; font-weight: 600; }
+.step.done { background: rgba(212,168,67,0.2); color: var(--accent-gold); }
+
+.creation-panel {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+}
+.creation-preview {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); padding: 24px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 300px;
+}
+.creation-preview .avatar-placeholder {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: linear-gradient(135deg, #2a1a3e, #1a2a3e);
+  border: 3px solid var(--border-glow); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; color: var(--accent-gold);
+}
+.creation-preview h3 { font-size: 20px; margin-bottom: 8px; }
+.creation-preview .stat-list { width: 100%; margin-top: 16px; }
+.stat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+.stat-row .stat-name { color: var(--text-secondary); }
+.stat-row .stat-val { color: var(--accent-gold); font-weight: 600; }
+.creation-form { display: flex; flex-direction: column; gap: 16px; }
+.option-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.option-card {
+  padding: 12px; border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); background: var(--bg-input);
+  cursor: pointer; transition: var(--transition); text-align: center;
+  font-size: 13px;
+}
+.option-card:hover { border-color: var(--border-glow); }
+.option-card.selected { border-color: var(--accent-gold); background: rgba(212,168,67,0.1); }
+.option-card .opt-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* === 游戏主界面 === */
+.game-layout {
+  display: grid; grid-template-columns: 240px 1fr 240px;
+  gap: 0; height: calc(100vh - 56px); margin-top: 56px;
+}
+.game-sidebar {
+  background: var(--bg-secondary); border-right: 1px solid var(--border-color);
+  padding: 16px; overflow-y: auto;
+}
+.game-sidebar-right {
+  background: var(--bg-secondary); border-left: 1px solid var(--border-color);
+  padding: 16px; overflow-y: auto;
+}
+.game-main {
+  padding: 24px; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+
+/* 角色信息面板 */
+.char-portrait {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #2a1a3e, #1a2a3e);
+  border: 2px solid var(--border-glow); margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; color: var(--accent-gold);
+}
+.sidebar-section { margin-bottom: 20px; }
+.sidebar-section h4 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-muted); margin-bottom: 10px; border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+.stat-bar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  font-size: 12px;
+}
+.stat-bar .label { width: 50px; color: var(--text-secondary); flex-shrink: 0; }
+.stat-bar .bar-bg {
+  flex: 1; height: 6px; background: var(--bg-input);
+  border-radius: 3px; overflow: hidden;
+}
+.stat-bar .bar-fill {
+  height: 100%; border-radius: 3px; transition: width 0.5s ease;
+}
+.stat-bar .value { width: 30px; text-align: right; color: var(--text-primary); font-size: 12px; }
+
+/* 叙事区域 */
+.narrative-area {
+  flex: 1; overflow-y: auto; margin-bottom: 20px;
+}
+.narrative-text {
+  font-size: 15px; line-height: 1.9; color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.narrative-text .location-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 4px;
+  background: rgba(212,168,67,0.15); color: var(--accent-gold);
+  font-size: 12px; margin-bottom: 12px;
+}
+.narrative-text .npc-name { color: var(--accent-cyan); font-weight: 600; }
+.narrative-text .item-name { color: var(--accent-purple); }
+.narrative-text .system-msg {
+  color: var(--text-muted); font-size: 13px; font-style: italic;
+  padding: 8px 0;
+}
+.narrative-text .combat-log {
+  color: var(--accent-red); font-family: var(--font-mono); font-size: 13px;
+  padding: 4px 0;
+}
+.narrative-text .success { color: var(--success); }
+.narrative-text .failure { color: var(--danger); }
+
+.choices-area { padding-top: 16px; border-top: 1px solid var(--border-color); }
+.choices-area h4 { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+
+/* 对话气泡 */
+.dialogue-box {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); padding: 16px 20px; margin: 12px 0;
+  position: relative;
+}
+.dialogue-box .speaker {
+  font-size: 13px; font-weight: 600; color: var(--accent-cyan); margin-bottom: 6px;
+}
+.dialogue-box .speaker.诺诺 { color: #ff6688; }
+.dialogue-box .speaker.楚子航 { color: #6688ff; }
+.dialogue-box .speaker.凯撒 { color: #ffcc44; }
+.dialogue-box .speaker.路明非 { color: #88cc88; }
+.dialogue-box .speaker.昂热 { color: #cccccc; }
+
+/* 战斗界面 */
+.combat-overlay {
+  background: rgba(10,10,20,0.95); border: 2px solid var(--accent-red);
+  border-radius: var(--radius-lg); padding: 24px; margin: 16px 0;
+}
+.combat-overlay .combat-title {
+  text-align: center; font-size: 20px; font-weight: 700;
+  color: var(--accent-red); margin-bottom: 16px;
+}
+.combat-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+}
+.combatant { text-align: center; }
+.combatant .name { font-weight: 600; margin-bottom: 4px; }
+.combatant .hp-bar { height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+.combatant .hp-fill { height: 100%; background: linear-gradient(90deg, var(--accent-red), var(--accent-gold)); border-radius: 4px; transition: width 0.5s; }
+.combat-log-area {
+  background: #0a0a0a; border-radius: var(--radius-sm);
+  padding: 12px; font-family: var(--font-mono); font-size: 13px;
+  max-height: 200px; overflow-y: auto; margin-bottom: 12px;
+}
+
+/* 背包网格 */
+.inventory-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+}
+.inv-slot {
+  aspect-ratio: 1; background: var(--bg-input);
+  border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer; transition: var(--transition);
+}
+.inv-slot:hover { border-color: var(--accent-gold); }
+.inv-slot.has-item { border-color: var(--accent-purple); background: rgba(136,68,170,0.1); }
+
+/* 地图 */
+.map-container {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); padding: 16px; min-height: 200px;
+  position: relative;
+}
+.map-location {
+  padding: 8px 12px; margin: 4px 0; border-radius: var(--radius-sm);
+  background: var(--bg-input); cursor: pointer; font-size: 13px;
+  transition: var(--transition);
+}
+.map-location:hover { background: var(--bg-card-hover); }
+.map-location.current { border-left: 3px solid var(--accent-gold); color: var(--accent-gold); }
+.map-location.visited { opacity: 0.7; }
+.map-location.locked { opacity: 0.3; cursor: not-allowed; }
+
+/* 导入工具 */
+.import-area textarea {
+  width: 100%; min-height: 200px; padding: 16px;
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font-mono); font-size: 13px; resize: vertical;
+}
+.import-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* 创作者工坊 */
+.creator-workspace {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+}
+.template-editor textarea {
+  width: 100%; min-height: 400px; padding: 16px;
+  background: var(--bg-input); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-family: var(--font-mono); font-size: 13px;
+}
+.template-preview {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); padding: 24px;
+}
+
+/* 游戏大厅筛选 */
+.lobby-filters {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.filter-tag {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px;
+  background: var(--bg-card); color: var(--text-secondary);
+  cursor: pointer; transition: var(--transition);
+}
+.filter-tag:hover { background: var(--bg-card-hover); }
+.filter-tag.active { background: var(--accent-gold); color: #1a1a2e; }
+
+/* 存档列表 */
+.save-list { display: flex; flex-direction: column; gap: 8px; }
+.save-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: var(--bg-card);
+  border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+}
+.save-item:hover { border-color: var(--border-glow); }
+.save-item .save-info { flex: 1; }
+.save-item .save-title { font-size: 14px; font-weight: 500; }
+.save-item .save-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.save-item .save-actions { display: flex; gap: 6px; }
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .game-layout { grid-template-columns: 1fr; }
+  .game-sidebar, .game-sidebar-right { display: none; }
+  .creation-panel { grid-template-columns: 1fr; }
+  .creator-workspace { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .option-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 <div id="app">
@@ -96,11 +588,3374 @@
 </div>
 
 <!-- 脚本加载 -->
-<script src="js/core.js"></script>
-<script src="js/dragonraja.js"></script>
-<script src="js/lobby.js"></script>
-<script src="js/character.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/creator.js"></script>
+<script>/* ========================================
+   UU模拟器 - 核心引擎 (Core)
+   路由、状态管理、存储、UI基础设施
+   ======================================== */
+
+// ==========================================
+// 存储引擎 (IndexedDB + localStorage 双保险)
+// ==========================================
+const Store = {
+  _db: null,
+  _ready: false,
+
+  async init() {
+    try {
+      this._db = await this._openDB();
+      this._ready = true;
+    } catch(e) {
+      console.warn('IndexedDB不可用，回退到localStorage', e);
+      this._ready = false;
+    }
+  },
+
+  _openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('UUPlatform', 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('users')) {
+          db.createObjectStore('users', { keyPath: 'username' });
+        }
+        if (!db.objectStoreNames.contains('characters')) {
+          const cs = db.createObjectStore('characters', { keyPath: 'id', autoIncrement: true });
+          cs.createIndex('username', 'username', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('saves')) {
+          const ss = db.createObjectStore('saves', { keyPath: 'id', autoIncrement: true });
+          ss.createIndex('charId', 'charId', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('games')) {
+          db.createObjectStore('games', { keyPath: 'slug' });
+        }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' });
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = (e) => reject(e.target.error);
+    });
+  },
+
+  _getStore(name, mode = 'readonly') {
+    if (!this._db) return null;
+    const tx = this._db.transaction(name, mode);
+    return tx.objectStore(name);
+  },
+
+  async get(store, key) {
+    if (this._ready && this._db) {
+      try {
+        const os = this._getStore(store);
+        if (!os) throw new Error('DB not ready');
+        return new Promise((res, rej) => {
+          const req = os.get(key);
+          req.onsuccess = () => res(req.result || null);
+          req.onerror = () => rej(req.error);
+        });
+      } catch(e) {
+        return this._lsGet(store, key);
+      }
+    }
+    return this._lsGet(store, key);
+  },
+
+  async getAll(store) {
+    if (this._ready && this._db) {
+      try {
+        const os = this._getStore(store);
+        if (!os) throw new Error('DB not ready');
+        return new Promise((res, rej) => {
+          const req = os.getAll();
+          req.onsuccess = () => res(req.result || []);
+          req.onerror = () => rej(req.error);
+        });
+      } catch(e) {
+        return this._lsGetAll(store);
+      }
+    }
+    return this._lsGetAll(store);
+  },
+
+  async put(store, data) {
+    if (this._ready && this._db) {
+      try {
+        const os = this._getStore(store, 'readwrite');
+        if (!os) throw new Error('DB not ready');
+        return new Promise((res, rej) => {
+          const req = os.put(data);
+          req.onsuccess = () => res(req.result);
+          req.onerror = () => rej(req.error);
+        });
+      } catch(e) {
+        return this._lsPut(store, data);
+      }
+    }
+    return this._lsPut(store, data);
+  },
+
+  async delete(store, key) {
+    if (this._ready && this._db) {
+      try {
+        const os = this._getStore(store, 'readwrite');
+        if (!os) throw new Error('DB not ready');
+        return new Promise((res, rej) => {
+          const req = os.delete(key);
+          req.onsuccess = () => res(true);
+          req.onerror = () => rej(req.error);
+        });
+      } catch(e) {
+        return this._lsDelete(store, key);
+      }
+    }
+    return this._lsDelete(store, key);
+  },
+
+  // localStorage fallback
+  _lsGet(store, key) {
+    try {
+      const data = JSON.parse(localStorage.getItem(`uu_${store}`) || '{}');
+      return data[key] || null;
+    } catch { return null; }
+  },
+  _lsGetAll(store) {
+    try {
+      return Object.values(JSON.parse(localStorage.getItem(`uu_${store}`) || '{}'));
+    } catch { return []; }
+  },
+  _lsPut(store, data) {
+    try {
+      const key = data.id || data.username || data.slug || data.key;
+      const all = JSON.parse(localStorage.getItem(`uu_${store}`) || '{}');
+      all[key] = data;
+      localStorage.setItem(`uu_${store}`, JSON.stringify(all));
+      return true;
+    } catch { return false; }
+  },
+  _lsDelete(store, key) {
+    try {
+      const all = JSON.parse(localStorage.getItem(`uu_${store}`) || '{}');
+      delete all[key];
+      localStorage.setItem(`uu_${store}`, JSON.stringify(all));
+      return true;
+    } catch { return false; }
+  }
+};
+
+// ==========================================
+// 路由系统
+// ==========================================
+const Router = {
+  current: null,
+  routes: {},
+
+  register(name, renderFn) {
+    this.routes[name] = renderFn;
+  },
+
+  async go(name, params = {}) {
+    this.current = name;
+    const main = document.getElementById('main-content');
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // Show or create page
+    let page = document.getElementById(`page-${name}`);
+    if (!page) {
+      page = document.createElement('div');
+      page.id = `page-${name}`;
+      page.className = 'page';
+      main.appendChild(page);
+    }
+    page.classList.add('active');
+    // Render
+    if (this.routes[name]) {
+      page.innerHTML = '<div class="loading">加载中...</div>';
+      try {
+        page.innerHTML = await this.routes[name](params);
+      } catch(e) {
+        page.innerHTML = `<div class="page-error">加载失败: ${e.message}</div>`;
+        console.error(e);
+      }
+    }
+    // Update nav
+    document.querySelectorAll('.nav-link').forEach(l => {
+      l.classList.toggle('active', l.getAttribute('onclick')?.includes(name));
+    });
+    window.scrollTo(0, 0);
+  }
+};
+
+// ==========================================
+// 全局应用状态
+// ==========================================
+const App = {
+  user: null,
+  currentGame: null,
+  currentChar: null,
+  gameState: null,
+
+  async init() {
+    await Store.init();
+    this._loadUser();
+    this._setupNav();
+  },
+
+  _loadUser() {
+    try {
+      const u = localStorage.getItem('uu_current_user');
+      if (u) this.user = JSON.parse(u);
+    } catch {}
+    this._updateNavAuth();
+  },
+
+  _updateNavAuth() {
+    const loginBtn = document.getElementById('btn-login');
+    const userMenu = document.getElementById('user-menu');
+    const userName = document.getElementById('user-name-display');
+    const navProfile = document.getElementById('nav-profile');
+    if (!loginBtn) return; // DOM not ready yet
+    if (this.user) {
+      loginBtn.style.display = 'none';
+      if (userMenu) userMenu.style.display = 'block';
+      if (userName) userName.textContent = this.user.nick || this.user.username;
+      if (navProfile) navProfile.style.display = 'inline';
+    } else {
+      loginBtn.style.display = 'inline-flex';
+      if (userMenu) userMenu.style.display = 'none';
+      if (navProfile) navProfile.style.display = 'none';
+    }
+  },
+
+  _setupNav() {
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+          if (m.style.display !== 'none') m.style.display = 'none';
+        });
+      }
+    });
+  },
+
+  async login(username, password) {
+    const user = await Store.get('users', username);
+    if (!user) throw new Error('用户不存在');
+    if (user.password !== password) throw new Error('密码错误');
+    this.user = user;
+    localStorage.setItem('uu_current_user', JSON.stringify(user));
+    this._updateNavAuth();
+    return user;
+  },
+
+  async register(username, password, nick) {
+    const existing = await Store.get('users', username);
+    if (existing) throw new Error('用户名已存在');
+    const user = { username, password, nick: nick || username, created: Date.now() };
+    await Store.put('users', user);
+    this.user = user;
+    localStorage.setItem('uu_current_user', JSON.stringify(user));
+    this._updateNavAuth();
+    return user;
+  },
+
+  logout() {
+    this.user = null;
+    localStorage.removeItem('uu_current_user');
+    this._updateNavAuth();
+    Router.go('home');
+  },
+
+  async getGames() {
+    return await Store.getAll('games') || [];
+  },
+
+  async registerGame(gameData) {
+    return await Store.put('games', gameData);
+  },
+
+  async getCharacters(username) {
+    const all = await Store.getAll('characters') || [];
+    return all.filter(c => c.username === username);
+  },
+
+  async saveCharacter(char) {
+    char.username = this.user?.username || 'local';
+    return await Store.put('characters', char);
+  },
+
+  async getSaves(charId) {
+    const all = await Store.getAll('saves') || [];
+    return all.filter(s => s.charId === charId).sort((a, b) => b.savedAt - a.savedAt);
+  },
+
+  async saveGame(data) {
+    data.savedAt = Date.now();
+    return await Store.put('saves', data);
+  },
+
+  async loadSave(id) {
+    return await Store.get('saves', id);
+  },
+
+  async deleteSave(id) {
+    return await Store.delete('saves', id);
+  },
+
+  async deleteGame(slug) {
+    return await Store.delete('games', slug);
+  }
+};
+
+// ==========================================
+// UI 工具函数
+// ==========================================
+function navigate(page, params) { Router.go(page, params); }
+
+function showAuth() {
+  const modal = document.getElementById('auth-modal');
+  modal.style.display = 'flex';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-error').textContent = '';
+  switchAuth('login');
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    if (m) m.style.display = 'none';
+  });
+}
+
+function closeModalById(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+let authMode = 'login';
+function switchAuth(mode) {
+  authMode = mode;
+  document.getElementById('auth-title').textContent = mode === 'login' ? '登录' : '注册';
+  document.getElementById('auth-submit').textContent = mode === 'login' ? '登录' : '注册';
+  document.getElementById('reg-nick-group').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('reg-pwd2-group').style.display = mode === 'register' ? 'block' : 'none';
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${mode}`).classList.add('active');
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('auth-error');
+  errEl.style.display = 'none';
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!username || !password) {
+    errEl.textContent = '请填写用户名和密码';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    if (authMode === 'login') {
+      await App.login(username, password);
+    } else {
+      const nick = document.getElementById('auth-nick').value.trim() || username;
+      const pwd2 = document.getElementById('auth-password2').value;
+      if (password !== pwd2) {
+        errEl.textContent = '两次密码不一致';
+        errEl.style.display = 'block'; return;
+      }
+      await App.register(username, password, nick);
+    }
+    closeModal();
+    navigate('home');
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+function logout() {
+  App.logout();
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ==========================================
+// 启动
+// ==========================================
+document.addEventListener('DOMContentLoaded', async () => {
+  await App.init();
+  navigate('home');
+});
+</script>
+<script>/* ========================================
+   UU模拟器 - 龙族：火之晨曦 完整数据包
+   忠实于江南《龙族》原著设定
+   ======================================== */
+
+const DRAGONRAJA = {
+  template: {
+    slug: 'dragonraja',
+    title: '龙族：火之晨曦',
+    version: '1.0.0',
+    author: '内置 | 江南《龙族》原著改编',
+    description: '你收到了一封来自芝加哥远郊卡塞尔学院的录取通知书。这所表面普通的私立大学，实际上是秘党培养屠龙者的秘密机构。作为拥有龙族血统的混血种，你将踏入一个隐藏在人类世界之下的龙族战场。从火之晨曦到黑月之潮，你的每一个选择，都将改写龙族与人类的命运。',
+    startLocation: 'start',
+    stepNames: ['基本信息', '血统背景', '属性分配', '言灵选择', '确认创建'],
+
+    // ========================================
+    // 角色创建选项
+    // ========================================
+    bloodlines: [
+      { id: 'bai_de', name: '白王血裔', desc: '白王的后裔，精神属性潜力极高，言灵天赋惊人。白王是龙族四大君王之外的第五位王者，掌握精神元素的极致。', icon: '🤍' },
+      { id: 'hei_de', name: '黑王血裔', desc: '黑王尼德霍格的血脉继承者，肉体力量和龙血纯度极高。黑王是龙族的至高存在，所有龙类的始祖。', icon: '🖤' },
+      { id: 'hun_xue', name: '普通混血种', desc: '最常见的混血种，龙血与人类血脉融合均衡。优势在于适应性极强，不会像高纯血统那样容易被龙血反噬。', icon: '💜' },
+      { id: 'mi_dang', name: '秘党世家', desc: '出身秘党核心家族，家族世代从事屠龙事业。拥有丰富的知识和人脉，但对你的期望也更高。', icon: '⚜️' }
+    ],
+
+    backgrounds: [
+      { id: 'student', name: '普通学生', desc: '在收到卡塞尔通知书前，你只是个普通的高中生，过着平凡的生活。但你的血统注定了你不平凡的人生。' },
+      { id: 'fighter', name: '武术世家', desc: '自幼习武，身体素质远超常人。虽然不知道龙族的存在，但你的身体早已为战斗做好了准备。' },
+      { id: 'scholar', name: '学术天才', desc: '在历史和语言学方面有惊人的天赋。你对古文字和神话传说有独特的理解，这也许源于你血脉中的记忆。' },
+      { id: 'loner', name: '独行者', desc: '在街头长大，靠自己的本能活到现在。你的直觉异常敏锐，能感知到常人无法察觉的危险。' }
+    ],
+
+    attributes: [
+      { id: 'str', name: '力量', desc: '物理攻击力与体能', icon: '💪' },
+      { id: 'agi', name: '敏捷', desc: '速度与反应能力', icon: '⚡' },
+      { id: 'con', name: '体质', desc: '生命值与伤害抗性', icon: '🛡️' },
+      { id: 'int', name: '智力', desc: '知识储备与推理能力', icon: '🧠' },
+      { id: 'cha', name: '魅力', desc: '社交能力与领导力', icon: '💎' },
+      { id: 'blood', name: '血统纯度', desc: '龙血浓度，影响言灵威力和龙化风险', icon: '🔴' }
+    ],
+
+    spiritWords: [
+      { id: 'sword', name: '剑御·天羽羽斩', type: '攻击型', desc: '召唤无数利刃攻击敌人。攻击范围广，血统纯度越高剑阵越强。传说中此言灵曾斩杀过龙王。', icon: '🗡️' },
+      { id: 'flame', name: '炽·君焰', type: '攻击型', desc: '操控火焰的力量，释放高温烈焰焚烧一切。范围性杀伤力极强，但消耗也巨大。', icon: '🔥' },
+      { id: 'time', name: '时隙·时间零', type: '辅助型', desc: '感知时间流速的变化，让自己进入超加速状态。在言灵领域内，外界的一切都像慢动作。', icon: '⏳' },
+      { id: 'thunder', name: '雷·雷池', type: '攻击型', desc: '召唤雷电之力守护自身。兼具攻击和防御能力，速度极快。', icon: '⚡' },
+      { id: 'soul', name: '圣言·审判', type: '精神型', desc: '强大的精神攻击言灵，直接作用于目标的灵魂。无视物理防御，但对精神力强大的敌人效果减弱。', icon: '👁️' },
+      { id: 'shield', name: '盾·无尘之地', type: '防御型', desc: '在周身形成绝对防御领域。在领域内，一切攻击都会被阻挡，是混血种最强的防御言灵。', icon: '🔮' }
+    ],
+
+    // ========================================
+    // 世界观地点
+    // ========================================
+    locations: {
+      start: { id: 'start', name: '仕兰中学', icon: '🏫', desc: '你生活了十八年的城市，一所普通的中学。但今天，一切都将改变。' },
+      cc1000: { id: 'cc1000', name: 'CC1000次列车', icon: '🚂', desc: '通往卡塞尔学院的 magical 列车，从芝加哥出发，驶向一般人无法找到的地方。' },
+      campus: { id: 'campus', name: '卡塞尔学院', icon: '🏰', desc: '隐藏在芝加哥远郊山谷中的古老学院，秘党培养屠龙者的总部。哥特式建筑群中隐藏着无数秘密。' },
+      hall: { id: 'hall', name: '学院礼堂', icon: '🏛️', desc: '卡塞尔学院的主礼堂，用于新生典礼和重要仪式。穹顶上绘有龙族战争史的壁画。' },
+      library: { id: 'library', name: '图书馆·冰窖', icon: '📚', desc: '卡塞尔学院的图书馆地下一层，被称为"冰窖"。这里收藏着关于龙族历史的最珍贵资料。' },
+      training: { id: 'training', name: '训练场', icon: '⚔️', desc: '卡塞尔学院的实战训练场，模拟各种战斗环境。混血种们在这里磨练屠龙技艺。' },
+      cafeteria: { id: 'cafeteria', name: '学院食堂', icon: '🍽️', desc: '卡塞尔学院的食堂，也是学生们社交的主要场所。这里的菜品种类丰富得不可思议。' },
+      dormitory: { id: 'dormitory', name: '学生宿舍', icon: '🛏️', desc: '卡塞尔学院的学生宿舍，古老建筑内部却有着现代化的设施。' },
+      chicago: { id: 'chicago', name: '芝加哥', icon: '🌆', desc: '卡塞尔学院附近的大城市。混血种们偶尔会来这里执行任务或放松。' },
+      three_gorges: { id: 'three_gorges', name: '三峡水库', icon: '🌊', desc: '中国长江上的巨型水利工程。水下沉睡着龙族的秘密和危险。' },
+      beijing: { id: 'beijing', name: '北京', icon: '🏯', desc: '中国的首都。在这座古老的城市地下，隐藏着龙族亲王"大地与山之王"的踪迹。' },
+      tokyo: { id: 'tokyo', name: '东京', icon: '🗼', desc: '日本的首都。卡塞尔学院日本分部在这里经营着庞大的地下网络。源氏家族掌控着这座城市的黑夜。' },
+      classroom: { id: 'classroom', name: '教室', icon: '📖', desc: '卡塞尔学院的教室。这里的课程包括龙族历史、炼金术和格斗术。' },
+      roof: { id: 'roof', name: '学院天台', icon: '🌙', desc: '卡塞尔学院最高的地方，可以俯瞰整个山谷。是学生们谈心或独处的地方。' }
+    },
+
+    // ========================================
+    // 主要NPC
+    // ========================================
+    npcs: {
+      luminfei: { id: 'luminfei', name: '路明非', title: '新生', desc: '和你同届进入卡塞尔的新生，看起来有点衰，但似乎隐藏着不为人知的力量。', color: '#88cc88' },
+      chuzihang: { id: 'chuzihang', name: '楚子航', title: '狮心会会长', desc: '卡塞尔学院狮心会会长，沉默寡言的剑术天才。背后似乎有着沉重的过去。', color: '#6688ff' },
+      caesar: { id: 'caesar', name: '凯撒·加图索', title: '学生会主席', desc: '学生会主席，来自意大利加图索家族的贵公子。自信、高傲、实力强大。', color: '#ffcc44' },
+      nono: { id: 'nono', name: '诺诺', title: '学姐', desc: '凯撒的女朋友，性格洒脱不羁。对新生非常照顾，似乎对你有特别的兴趣。', color: '#ff6688' },
+      angers: { id: 'angers', name: '昂热校长', title: '卡塞尔学院校长', desc: '卡塞尔学院校长，秘党核心人物。看起来像个优雅的老绅士，实际上是最强的屠龙者之一。', color: '#cccccc' },
+      schneider: { id: 'schneider', name: '施耐德教授', title: '执行部部长', desc: '卡塞尔学院执行部部长，负责安排屠龙任务。脸上戴着呼吸面罩，声音沙哑。', color: '#aaaaaa' },
+      gudelian: { id: 'gudelian', name: '古德里安教授', title: '招生办主任', desc: '卡塞尔学院招生办主任，性格热情到有点神经质。亲自去中国面试路明非，对龙族历史如数家珍。', color: '#88aaff' },
+      fengel: { id: 'fengel', name: '芬格尔', title: '学长/室友', desc: '路明非的室友，看上去是个废柴学长，成天在宿舍打游戏。但没人知道他曾经是卡塞尔最强的A级学生。', color: '#aacc88' },
+      lumingze: { id: 'lumingze', name: '路鸣泽', title: '???', desc: '神秘的小男孩，自称是路明非的弟弟。总是在最关键的时刻出现，用交易换取路明非的力量。他也许是路明非体内龙族人格的具象。', color: '#ff4444' },
+      laotang: { id: 'laotang', name: '老唐', title: '网友', desc: '路明非在星际争霸里认识的朋友，操作犀利，性格豪爽。没人知道他的真实身份——龙王诺顿的人类化身。', color: '#ff8844' },
+      fengli: { id: 'fengli', name: '芬里厄', title: '???', desc: '隐藏在学院深处的神秘存在。似乎与龙族有着密切的关系。', color: '#ff4444' },
+      xiami: { id: 'xiami', name: '夏弥', title: '新生', desc: '一个神秘的女孩，似乎对龙族有着超乎寻常的了解。', color: '#ff88aa' },
+      yuanzhi: { id: 'yuanzhi', name: '源稚生', title: '日本分部分部长', desc: '卡塞尔学院日本分部的执行局局长，源氏家族的大家长。背负着守护日本的重任。', color: '#cc4444' },
+      huiyiyi: { id: 'huiyiyi', name: '上杉绘梨衣', title: '源氏家族的公主', desc: '源氏家族的小女儿，拥有极为罕见的强大言灵。她的命运与龙族紧密相连。', color: '#ff88cc' }
+    }
+  },
+
+  // ========================================
+  // 剧情节点树 —— 龙族I~III主线
+  // ========================================
+  scenes: {
+    // ========== 第一章：火之晨曦 ==========
+    start: {
+      id: 'start',
+      chapter: 1,
+      location: 'start',
+      narrative: `{name}同学：
+
+我们很荣幸地通知您，您已被芝加哥大学附属私立学院——卡塞尔学院（Cassell College）录取。
+
+随信附上您的录取通知书及CC1000次列车的特别车票。请您于本月15日抵达芝加哥联合车站，乘坐CC1000次列车前往学院报到。
+
+请注意：本录取通知书具有法律效力，请勿遗失。
+
+——卡塞尔学院招生办`
+
+      + `\n\n你放下手中的信纸，心跳有些加速。这封信来得太突然了——你甚至不记得自己申请过这所学院。\n\n窗外是仕兰中学午后的阳光，操场上同学们在打篮球。但你知道，从收到这封信开始，你的生活就不一样了。\n\n信的末尾附着一串烫金的地址：芝加哥远郊·卡塞尔学院。以及一行小字——"你身体里流着不一样的血。"\n\n你把这封信翻来覆去看了三遍。去，还是不去？`,
+
+      choices: [
+        {
+          text: '决定去卡塞尔学院看看',
+          hint: '也许这真的是你人生的转折点',
+          next: 'cc1000_departure',
+          effects: { flag: 'chose_to_go' }
+        },
+        {
+          text: '先和家里人商量一下',
+          hint: '这么大的事不能一个人决定',
+          next: 'family_talk',
+          effects: { flag: 'talked_to_family' }
+        },
+        {
+          text: '在网上搜索卡塞尔学院的信息',
+          hint: '一所在网上几乎查不到任何信息的学校',
+          next: 'search_info',
+          effects: { flag: 'searched_online' }
+        }
+      ]
+    },
+
+    // 分支：和家人商量
+    family_talk: {
+      id: 'family_talk',
+      chapter: 1,
+      location: 'start',
+      narrative: `你的父母看到这封信后，表情有些复杂。\n\n"卡塞尔学院……"你父亲念着这个名字，像是想起了什么，"我听说过这所学校。你叔叔以前好像也收到过他们的邀请。"\n\n你叔叔？那个你从未谋面、据说在国外做"特殊工作"的叔叔？\n\n"去吧。"你父亲拍了拍你的肩膀，"有些路，是该你自己走的。"\n\n第二天，你收拾好行李，踏上了前往芝加哥的飞机。`,
+
+      effects: { flag: 'family_approves' },
+      choices: [
+        { text: '前往芝加哥联合车站', next: 'cc1000_departure' }
+      ]
+    },
+
+    // 分支：网上搜索
+    search_info: {
+      id: 'search_info',
+      chapter: 1,
+      location: 'start',
+      narrative: `你在网上搜索"卡塞尔学院"，却发现——几乎没有任何信息。\n\n这所学院的官网极其简陋，只有几行介绍文字和一个招生邮箱。没有校园照片，没有学生论坛，没有社交媒体的任何痕迹。\n\n你搜遍了所有留学论坛，只有一条三年前的帖子提到过这个名字："有人听说过卡塞尔学院吗？我收到了他们的录取通知，但网上什么都查不到。"\n\n下面唯一的回复写着："去吧，你不会后悔的。"\n\n这神秘感反而激起了你的好奇心。你合上电脑，开始收拾行李。`,
+
+      choices: [
+        { text: '带着好奇心前往芝加哥', next: 'cc1000_departure' }
+      ]
+    },
+
+    // CC1000次列车
+    cc1000_departure: {
+      id: 'cc1000_departure',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `芝加哥联合车站，下午四点。\n\n你在月台上找到了那列CC1000次列车——一列看起来像是上个世纪的老式蒸汽火车，墨绿色的车身在现代化的车站里显得格格不入。\n\n检票员是个戴着圆框眼镜的老头，他看了看你的车票，微微一笑："欢迎上车，{name}同学。"\n\n车厢内部的装修出乎意料地豪华——深红色的天鹅绒座椅、黄铜的灯饰、橡木的壁板。车厢里零星坐着几个和你差不多大的年轻人。\n\n你注意到角落里坐着一个穿白色校服的男生，一头刺眼的金发，正在喝红茶。在他的对面，一个黑发少年靠在窗边，闭目养神，膝盖上横放着一个黑色的琴盒。\n\n列车缓缓开动了，驶入了一条隧道。当它重新驶出时，窗外的景色已经变成了一片陌生的山谷。`,
+
+      choices: [
+        {
+          text: '主动和金发男生打招呼',
+          hint: '看起来是个值得认识的人',
+          next: 'meet_caesar',
+          effects: { flag: 'met_caesar_first', affection: { '凯撒·加图索': 5 } }
+        },
+        {
+          text: '和那个带琴盒的黑发少年搭话',
+          hint: '他身上的气息让你感到熟悉',
+          next: 'meet_chuzihang',
+          effects: { flag: 'met_chuzihang_first', affection: { '楚子航': 5 } }
+        },
+        {
+          text: '找个空位坐下，观察周围的人',
+          hint: '先摸清楚状况再说',
+          next: 'cc1000_observe',
+          effects: { flag: 'observed_first' }
+        }
+      ]
+    },
+
+    meet_caesar: {
+      id: 'meet_caesar',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `你走向那个金发男生。他抬起头，用一双冰蓝色的眼睛打量着你。\n\n"新生？"他的中文出奇地标准，"我是凯撒·加图索，学生会主席。你呢？"\n\n你报上名字。凯撒点点头，示意你坐下。\n\n"卡塞尔不是什么普通的大学，"他抿了一口红茶，"你很快就会明白。不过别担心，有我在，没人敢欺负新生。"\n\n他笑了笑，那笑容里带着几分自信和几分玩世不恭。\n\n对面的黑发少年这时睁开了眼睛，淡淡地看了一眼凯撒，又闭上了。\n\n"那是楚子航，"凯撒压低声音，"狮心会会长。别招惹他，他是个怪物。"`,
+
+      effects: { flag: 'met_caesar', affection: { '凯撒·加图索': 10 } },
+      choices: [
+        { text: '询问卡塞尔学院到底是什么地方', next: 'cc1000_question', effects: { flag: 'asked_about_school' } },
+        { text: '聊一聊凯撒在学院的生活', next: 'cc1000_chat', effects: { flag: 'chatted_caesar', affection: { '凯撒·加图索': 5 } } },
+        { text: '看向窗外的山谷，陷入沉思', next: 'cc1000_arrival' }
+      ]
+    },
+
+    meet_chuzihang: {
+      id: 'meet_chuzihang',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `你在黑发少年对面坐下。他睁开眼睛，金色的瞳孔一闪而过——你几乎以为自己看错了。\n\n"有事？"他的声音低沉而冷淡。\n\n"呃……第一次来，有点紧张。"你说。\n\n他沉默了几秒，然后说："到了学院，离那个金发的远一点。"他朝凯撒的方向扬了扬下巴，"他是麻烦精。"\n\n他顿了顿，又补充了一句："不过如果你遇到真正的麻烦，可以来找我。狮心会，楚子航。"\n\n说完他重新闭上眼睛，不再说话。他膝盖上的琴盒看起来价值不菲，但你注意到琴盒的边角有磕碰的痕迹——那不是乐器该有的伤痕。`,
+
+      effects: { flag: 'met_chuzihang', affection: { '楚子航': 10 } },
+      choices: [
+        { text: '追问琴盒里装的是什么', next: 'cc1000_qinhe', effects: { flag: 'asked_about_case' } },
+        { text: '安静地坐着，等待到达', next: 'cc1000_arrival' },
+        { text: '还是去和那个金发男生聊聊', next: 'meet_caesar', effects: { flag: 'switched_to_caesar' } }
+      ]
+    },
+
+    cc1000_observe: {
+      id: 'cc1000_observe',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `你找了个靠窗的位置坐下，观察着车厢里的其他人。\n\n除了金发的凯撒和黑发的楚子航，还有几个看起来也是新生的学生——有的在兴奋地交谈，有的紧张地翻看入学手册。\n\n一个红发女生注意到了你的目光，朝你笑了笑。她的笑容很明媚，让你稍微放松了一些。\n\n列车穿行在绿色的山谷中，窗外的风景美得像一幅油画。但你总觉得，这片平静的背后隐藏着什么。\n\n你的手机突然震动了一下——一条新短信："欢迎来到卡塞尔，新生。你身体里的血，在呼唤你。"\n\n发件人未知。`,
+
+      effects: { flag: 'observed', affection: { '诺诺': 5 } },
+      choices: [
+        { text: '去找那个红发女生搭话', next: 'meet_nono', effects: { flag: 'met_nono' } },
+        { text: '去找凯撒聊聊', next: 'meet_caesar' },
+        { text: '去找楚子航', next: 'meet_chuzihang' }
+      ]
+    },
+
+    meet_nono: {
+      id: 'meet_nono',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `你走向那个红发女生。她抬起头，一双暗红色的眼睛笑盈盈地看着你。\n\n"新生？我叫诺诺。你呢？"她的声音很好听。\n\n"你不用太紧张，"她说，"卡塞尔虽然不太正常，但还挺好玩的。至少比普通大学有意思多了。"\n\n她指了指窗外："看到那座山了吗？学院就在山后面。整个山谷都是卡塞尔的地盘。"\n\n你顺着她指的方向看去，隐约看到山谷深处有一座灰色的城堡轮廓。\n\n"对了，"诺诺凑近你，压低声音，"到了之后，别喝校长给你的茶。他老人家泡的茶……一般人扛不住。"\n\n她狡黠地眨了眨眼睛。`,
+
+      effects: { flag: 'met_nono', affection: { '诺诺': 10 } },
+      choices: [
+        { text: '问诺诺学院里还有什么需要注意的', next: 'cc1000_nono_advice', effects: { flag: 'asked_nono_advice', affection: { '诺诺': 5 } } },
+        { text: '看向窗外越来越近的城堡', next: 'cc1000_arrival' }
+      ]
+    },
+
+    cc1000_question: {
+      id: 'cc1000_question',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `"卡塞尔到底是什么地方？"你问凯撒。\n\n凯撒放下茶杯，表情变得认真了一些。\n\n"一所培养猎人的学校。"他说，"猎杀那些……不该存在于这个世界上的东西。"\n\n"比如？"\n\n"龙。"他说出这个字的时候，车厢里的空气似乎凝固了一秒。"你相信龙存在吗？不是那种长翅膀的大蜥蜴，而是——曾经统治过这个世界的古老生物。"\n\n你没说话。\n\n"你很快就会亲眼看到的。"凯撒重新端起茶杯，"在那之前，好好享受你的普通人生吧。因为从明天开始，你的人生就不再普通了。"`,
+
+      choices: [
+        { text: '看向窗外，消化刚才的信息', next: 'cc1000_arrival', effects: { flag: 'know_about_dragons' } },
+        { text: '继续追问关于龙族的细节', next: 'cc1000_more_dragon', effects: { flag: 'asked_more_about_dragons' } }
+      ]
+    },
+
+    cc1000_more_dragon: {
+      id: 'cc1000_more_dragon',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `"龙族……真的存在？"你追问。\n\n凯撒意味深长地笑了笑："人类历史只有五千年，但龙族统治了这个世界几万年。它们沉睡在地底、在深海、在冰川之下……等待着苏醒的时刻。"\n\n"而我们混血种，"他指了指自己，又指了指你，"就是站在人类和龙族之间的那道防线。"\n\n"混血种？"\n\n"你身体里流着龙的血，{name}。这就是为什么卡塞尔选择了你。"\n\n车厢里安静了几秒。远处传来汽笛声，列车正在减速。\n\n"到了。"凯撒站起来，整理了一下衣领，"欢迎来到卡塞尔。"`,
+
+      effects: { flag: 'know_about_hybrids' },
+      choices: [
+        { text: '跟着凯撒下车', next: 'campus_arrival', effects: { affection: { '凯撒·加图索': 5 } } }
+      ]
+    },
+
+    cc1000_arrival: {
+      id: 'cc1000_arrival',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `列车缓缓减速。窗外的山谷中，一座灰色的哥特式城堡出现在眼前——那是一座巨大的建筑群，尖塔、拱门、彩色玻璃窗，在夕阳的照耀下泛着金色的光。\n\n那就是卡塞尔学院。\n\n列车停稳了。车厢里的学生们开始收拾行李。凯撒站起身，拉了拉衣领。楚子航提起琴盒，一言不发地走向车门。诺诺朝你挥了挥手。\n\n你深吸一口气，拎起行李，踏上了月台——\n\n山间的风吹在脸上，带着青草和泥土的气息。远处传来悠扬的钟声。\n\n一个新的世界，在你面前展开了。`,
+
+      effects: { flag: 'arrived_cassell' },
+      choices: [
+        { text: '跟随人流前往学院主楼', next: 'campus_arrival' },
+        { text: '先在校园里四处转转', next: 'campus_explore', effects: { flag: 'explored_first' } }
+      ]
+    },
+
+    cc1000_chat: {
+      id: 'cc1000_chat',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `你和凯撒聊了一路。他告诉你卡塞尔学院的各种趣事——校长昂热喜欢在半夜弹钢琴，图书馆地下有个叫"冰窖"的地方藏着龙族文物，食堂的牛排是全芝加哥最好的……\n\n"对了，"凯撒忽然说，"入学第一天有个小测试。别紧张，不是考试——是测试你的血统纯度。"\n\n"血统纯度？"\n\n"嗯，"凯撒的表情变得微妙，"就是看看你体内的龙血有多少。太高了很危险——你会被龙血控制。太低了又没用。只有恰到好处，才是合格的屠龙者。"\n\n你正要追问，列车鸣响了汽笛。\n\n"到了。"凯撒站起身，"欢迎来到卡塞尔。"`,
+
+      effects: { flag: 'know_about_test', affection: { '凯撒·加图索': 10 } },
+      choices: [
+        { text: '跟随凯撒下车', next: 'campus_arrival', effects: { affection: { '凯撒·加图索': 5 } } }
+      ]
+    },
+
+    cc1000_qinhe: {
+      id: 'cc1000_qinhe',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `"你这个琴盒……看起来不像是装乐器的。"你试探着问。\n\n楚子航睁开眼睛，那双金色的瞳孔再次一闪而过。\n\n"你说得对。"他的声音平静得像一潭死水，"里面是一把刀。"\n\n他打开琴盒的一角，你看到一抹冷冽的寒光——那是一柄日本刀，刀身上刻着古老的花纹。\n\n"村雨，"楚子航说，"我父亲留给我的。"\n\n他的眼中闪过一丝不易察觉的悲伤，然后迅速合上了琴盒。\n\n"到了。"他说，站起身来。`,
+
+      effects: { flag: 'saw_村雨', affection: { '楚子航': 5 } },
+      choices: [
+        { text: '和楚子航一起下车', next: 'campus_arrival', effects: { affection: { '楚子航': 5 } } }
+      ]
+    },
+
+    cc1000_nono_advice: {
+      id: 'cc1000_nono_advice',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `"学院里还有什么需要注意的？"你问。\n\n诺诺想了想："第一，别惹狮心会的人。第二，别在图书馆里大声说话——管理员是个脾气暴躁的老太太。第三……"她神秘地压低声音，"如果晚上听到走廊里有奇怪的声音，别去管。那只是学院在'呼吸'。"\n\n"呼吸？"\n\n"卡塞尔学院本身就是一座巨大的炼金矩阵，"诺诺说，"它在吸收地脉的能量，用来压制地下的某个东西。"\n\n"什么东西？"\n\n诺诺还没来得及回答，列车汽笛声响起。\n\n"到了。"她站起来，拍了拍你的肩膀，"走吧，冒险开始了。"`,
+
+      effects: { flag: 'nono_warnings', affection: { '诺诺': 5 } },
+      choices: [
+        { text: '和诺诺一起下车', next: 'campus_arrival', effects: { affection: { '诺诺': 5 } } }
+      ]
+    },
+
+    campus_explore: {
+      id: 'campus_explore',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你没有随人流进去，而是绕着学院的外围走了一圈。\n\n卡塞尔学院比想象中更大。主建筑是一座哥特式城堡，两侧延伸出翼楼，后面是大片的绿地和树林。你注意到主楼后面有一座独立的小教堂，屋顶上有奇怪的金属尖刺——看起来不像是宗教装饰。\n\n在树林边，你发现了一座石碑。上面用拉丁文刻着一行字：\n\n"Illegitimi non carborundum."\n\n（不要被杂碎击败。）\n\n你正琢磨这句话的意思，身后传来一个声音：\n\n"那是卡塞尔的校训。"\n\n你转过身——一个穿着黑色西装、戴着圆框眼镜的老人站在你身后，手里拄着一根乌木手杖。他看起来至少七十岁了，但腰板挺得笔直，眼睛炯炯有神。\n\n"我是昂热，这所学院的校长。"他微笑着说，"欢迎来到卡塞尔。"`,
+
+      effects: { flag: 'met_angers_early', affection: { '昂热校长': 10 } },
+      choices: [
+        { text: '和校长聊聊学院的历史', next: 'angers_talk', effects: { flag: 'talked_angers', affection: { '昂热校长': 5 } } },
+        { text: '跟着校长进入学院', next: 'campus_arrival', effects: { flag: 'enter_with_angers' } }
+      ]
+    },
+
+    angers_talk: {
+      id: 'angers_talk',
+      chapter: 1,
+      location: 'campus',
+      narrative: `"校长先生，这座学院到底——"你开口。\n\n"——到底是做什么的？"昂热接过话头，微笑着用手杖点了点地面，"卡塞尔学院成立于1900年，由秘党创立。我们的使命只有一个：屠龙。"\n\n"龙真的存在？"\n\n昂热的表情变得深邃："不仅存在，而且它们正在苏醒。一百二十年前，秘党的创始人们就预见到了这一天。所以他们建立了卡塞尔，一代一代地培养屠龙者，为的就是在龙族回归的时候——人类不会毫无还手之力。"\n\n他看着你，目光变得锐利："而你，{name}，就是被选中的人。你身体里流着龙的血——但你选择站在人类这边。"\n\n"走吧，"他转身走向学院大门，"还有很多事等着你。"`,
+
+      effects: { flag: 'angers_explained', affection: { '昂热校长': 10 } },
+      choices: [
+        { text: '跟着校长进入学院', next: 'campus_arrival' }
+      ]
+    },
+
+    // 到达学院
+    campus_arrival: {
+      id: 'campus_arrival',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你走进卡塞尔学院的大门。\n\n门厅比想象中更加宏伟——高达二十米的穹顶上绘着巨大的壁画，描绘着人与龙之间的战争。穿着各色校服的学生们在走廊里穿梭，有的在讨论课程，有的在争论什么。\n\n一个戴眼镜的男生匆匆走过，怀里抱着一本比你头还厚的书，书名是《龙族谱系学导论》。\n\n"新生？"一个声音从身后传来。\n\n你转身——一个穿着黑色风衣、戴着呼吸面罩的男人站在你面前。他的声音沙哑而低沉，面罩后面是一双锐利的眼睛。\n\n"我是施耐德，执行部部长。"他说，"跟我来，需要进行入学测试。"\n\n他没有等你回答，转身就走。他的步伐很快，风衣的下摆翻飞，露出腰间别着的——那是一把枪？`,
+
+      choices: [
+        { text: '跟上施耐德教授', next: 'blood_test', effects: { flag: 'followed_schneider' } },
+        { text: '先找个新生问问情况', next: 'find_luminfei', effects: { flag: 'look_for_other_newbie' } }
+      ]
+    },
+
+    find_luminfei: {
+      id: 'find_luminfei',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你在走廊里拦住了一个看起来同样迷茫的男生——他戴着一副黑框眼镜，头发有点乱，看起来跟你差不多大。\n\n"你好……你也是新生？"你问。\n\n"啊，是是是，"他有点慌张地点头，"我叫路明非，来自……呃……不重要。你也是刚来的？"\n\n"是啊，你知道入学测试在哪吗？"\n\n路明非挠了挠头："好像……听说是在礼堂那边？我刚看到一个穿风衣的怪人往那边走了。"\n\n"那是施耐德教授。"你说。\n\n"哦……"路明非缩了缩脖子，"看起来不太好惹。要不……咱俩一起去？"\n\n他冲你笑了笑，那笑容带着点讨好，但也让人放心。`,
+
+      effects: { flag: 'met_luminfei', affection: { '路明非': 10 } },
+      choices: [
+        { text: '和路明非一起去礼堂', next: 'blood_test', effects: { flag: 'go_with_mingfei', affection: { '路明非': 5 } } }
+      ]
+    },
+
+    // ========== 血统测试 ==========
+    blood_test: {
+      id: 'blood_test',
+      chapter: 1,
+      location: 'hall',
+      narrative: `礼堂里，所有新生排成一排。\n\n施耐德教授站在前方，手里拿着一个金属盒子。\n\n"你们来到这里，不是偶然，"他的声音在空旷的礼堂里回荡，"卡塞尔学院从全世界寻找拥有龙族血统的人。你们每个人的身体里，都流着龙的血。"\n\n新生们窃窃私语。\n\n"但龙血既是恩赐，也是诅咒。血统纯度太低，无法成为合格的屠龙者。血统纯度太高——你可能会被龙血反噬，变成……龙。"\n\n施耐德打开金属盒，里面是一排注射器，针头泛着诡异的蓝光。\n\n"这是测试药剂。它会暂时激发你体内的龙血，让我们能够检测你的血统纯度。注射过程可能有些不适。"\n\n他叫出第一个名字。\n\n轮到你了。施耐德看着你，手中的注射器在灯光下闪烁。\n\n"伸出手。"他说。`,
+
+      choices: [
+        {
+          text: '伸出手，接受测试',
+          hint: '这是了解自己的唯一途径',
+          next: 'test_result',
+          effects: { flag: 'accepted_test' }
+        },
+        {
+          text: '"等等——药剂注射后会发生什么？"',
+          hint: '先问清楚',
+          next: 'test_question',
+          effects: { flag: 'asked_about_test' }
+        }
+      ]
+    },
+
+    test_question: {
+      id: 'test_question',
+      chapter: 1,
+      location: 'hall',
+      narrative: `"注射后会怎么样？"你问。\n\n施耐德面无表情地看着你："龙血会被激活。你的瞳孔可能会变成金色。你可能会听到一些……声音。那是龙族血脉中的记忆在苏醒。"\n\n"有人会失控吗？"\n\n"很少。"施耐德说，"但确实发生过。"\n\n他顿了顿："但如果你连了解自己的勇气都没有，那你就不配站在卡塞尔的旗下。你想清楚了吗？"\n\n礼堂里安静极了。所有新生都在看着你。`,
+
+      choices: [
+        { text: '伸出手："来吧。"', next: 'test_result', effects: { flag: 'accepted_test_after_question' } },
+        { text: '后退一步："我需要时间考虑。"', next: 'test_refuse', effects: { flag: 'refused_test' } }
+      ]
+    },
+
+    test_refuse: {
+      id: 'test_refuse',
+      chapter: 1,
+      location: 'hall',
+      narrative: `你后退了一步。\n\n施耐德看着你，眼神中并无责怪。"理解。恐惧是正常的。"\n\n他转向下一个学生。\n\n但你心里明白——这一步后退，可能意味着你还没有准备好面对真正的自己。\n\n测试结束后，施耐德找到你："在你的血统稳定之前，你可以作为旁听生留在卡塞尔。但记住——龙血不会因为你逃避就消失。它在你体内流淌，总有一天，你必须面对它。"`,
+
+      effects: { flag: 'refused_test', location: 'hall' },
+      choices: [
+        { text: '在学院里先适应一段时间', next: 'campus_life_intro', effects: { flag: 'audit_student' } },
+        { text: '改变主意，去找施耐德要求重新测试', next: 'test_result', effects: { flag: 'changed_mind_test' } }
+      ]
+    },
+
+    // ========== 测试结果 ==========
+    test_result: {
+      id: 'test_result',
+      chapter: 1,
+      location: 'hall',
+      narrative: `针尖刺入皮肤。冰凉的液体注入血管。\n\n一开始什么感觉都没有。然后——\n\n你的心脏猛地一跳。血液像是变成了岩浆，在血管里奔涌。你的视野变成了一片金色——你看到天花板上的壁画活了，龙在火焰中翱翔，古代的英雄们在龙背上战斗。\n\n你听到了一个声音——低沉、古老、充满了力量——在你的脑海里回荡：\n\n"……你终于来了。"\n\n然后一切归于平静。\n\n你眨了眨眼睛，视野恢复了正常。施耐德正看着手中的仪器，表情难得地出现了一丝波动。\n\n"有意思。"他说。\n\n他没有告诉你具体数值，但你注意到周围的学生看你的眼神变得不一样了。路明非投来一个又惊讶又佩服的表情。凯撒在角落里微微挑眉。`,
+
+      effects: { flag: 'test_done', location: 'hall' },
+      choices: [
+        {
+          text: '追问施耐德教授我的血统评级',
+          hint: '你必须知道真相',
+          next: 'ask_rating',
+          effects: { flag: 'asked_rating' }
+        },
+        {
+          text: '先去找路明非聊聊',
+          hint: '他也是新生，应该能理解你的感受',
+          next: 'talk_to_mingfei',
+          effects: { flag: 'talk_mingfei_after_test', affection: { '路明非': 5 } }
+        },
+        {
+          text: '去找诺诺，她看起来比较好说话',
+          hint: '也许她能告诉你学院的真实情况',
+          next: 'talk_to_nono_after',
+          effects: { flag: 'talk_nono_after_test', affection: { '诺诺': 5 } }
+        }
+      ]
+    },
+
+    ask_rating: {
+      id: 'ask_rating',
+      chapter: 1,
+      location: 'hall',
+      narrative: `你追上施耐德教授："我的血统评级是多少？"\n\n施耐德停下脚步，沉默了几秒。\n\n"S级。"他说。\n\n周围安静得可怕。\n\n"卡塞尔学院建校一百二十年来，只出过三个S级评级的学生。"施耐德看着你，"你知道这意味着什么吗？"\n\n你不知道。但你从他的眼神中看到了一丝——担忧。\n\n"S级意味着你的龙血纯度极高，"施耐德说，"高到……如果有一天你选择站在龙族那边，你会成为一个极其危险的敌人。"\n\n他转身离开，留下一句话：\n\n"别让我们失望。"`,
+
+      effects: { flag: 's_rating', location: 'hall' },
+      choices: [
+        { text: '去找路明非，他看起来需要朋友', next: 'talk_to_mingfei', effects: { affection: { '路明非': 5 } } },
+        { text: '去图书馆查资料，了解S级血统的含义', next: 'library_first', effects: { flag: 'go_library_for_info' } },
+        { text: '去找凯撒，他应该知道更多', next: 'talk_to_caesar_after', effects: { affection: { '凯撒·加图索': 5 } } }
+      ]
+    },
+
+    talk_to_mingfei: {
+      id: 'talk_to_mingfei',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你找到路明非的时候，他正蹲在礼堂外面的台阶上发呆。\n\n"嘿。"你坐到他旁边。\n\n"啊，是你。"他勉强笑了笑，"听说你是S级？厉害啊……"他的语气里听不出嫉妒，只有赞叹。\n\n"你怎么样？"\n\n"我？"路明非自嘲地笑了笑，"A级……但我觉得可能是搞错了。我就是个普通人，真的。打游戏还行，让我屠龙？算了吧。"\n\n他低下头："但来都来了……总不能就这么跑了吧。"\n\n他看着远方的山峦，沉默了一会儿。\n\n"你说，我们真的能……呃……屠龙吗？"他问，"我是说，那可是龙啊，神话里那种。"`,
+
+      effects: { flag: 'comforted_mingfei', affection: { '路明非': 10 } },
+      choices: [
+        { text: '"能。因为我们已经没有退路了。"', next: 'campus_life_intro', effects: { flag: 'encouraged_mingfei', affection: { '路明非': 5 } } },
+        { text: '"我也不知道，但总要试试。"', next: 'campus_life_intro', effects: { flag: 'honest_with_mingfei', affection: { '路明非': 5 } } }
+      ]
+    },
+
+    talk_to_nono_after: {
+      id: 'talk_to_nono_after',
+      chapter: 1,
+      location: 'cafeteria',
+      narrative: `你在食堂找到了诺诺。她正一个人吃着冰淇淋，看到你过来，笑了笑。\n\n"S级？不错嘛。"她竖起大拇指，"我就知道你不一样。"\n\n"你也是S级？"\n\n"我？"诺诺笑了，"B+。够用就行。"\n\n她挖了一勺冰淇淋："S级有好有坏。好处是，你会得到更多的资源和关注。坏处是——更多人盯着你。而且，血统越高，越容易被龙血影响。"\n\n她看着你，表情变得认真：\n\n"在卡塞尔，力量越强，责任越大。别被力量冲昏了头。"`,
+
+      effects: { flag: 'talked_nono', affection: { '诺诺': 10 } },
+      choices: [
+        { text: '"我会记住的。"', next: 'campus_life_intro' },
+        { text: '问诺诺关于执行部的事情', next: 'ask_about_executive', effects: { flag: 'asked_about_exec' } }
+      ]
+    },
+
+    talk_to_caesar_after: {
+      id: 'talk_to_caesar_after',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你在训练场找到了凯撒。他正在练习射击，每一枪都正中靶心。\n\n"S级？"他放下枪，擦了擦汗，"意料之中。我看人的眼光一向很准。"\n\n"S级到底意味着什么？"\n\n凯撒靠在墙边："意味着你可能是这一代混血种里最强的之一。也意味着……你可能会成为所有龙王的目标。"\n\n他顿了顿："你知道为什么卡塞尔要建立执行部吗？因为历史上那些S级血统的混血种，有一半最后都……叛变了。龙血对他们的影响太大了。"\n\n他直视着你的眼睛：\n\n"你会叛变吗？"`,
+
+      effects: { flag: 'talked_caesar', affection: { '凯撒·加图索': 10 } },
+      choices: [
+        { text: '"绝对不会。我知道自己站在哪一边。"', next: 'campus_life_intro', effects: { flag: 'sworn_to_caesar', affection: { '凯撒·加图索': 5 } } },
+        { text: '"我不知道。但我希望不会。"', next: 'campus_life_intro', effects: { flag: 'honest_to_caesar', affection: { '凯撒·加图索': 5 } } }
+      ]
+    },
+
+    ask_about_executive: {
+      id: 'ask_about_executive',
+      chapter: 1,
+      location: 'cafeteria',
+      narrative: `"执行部是做什么的？"你问。\n\n诺诺的表情变得有些微妙："执行部……就是干脏活的。处理龙族事件、回收危险物品、清除叛徒……总之，最危险的任务都是执行部在做。"\n\n"施耐德教授就是执行部的头儿。别看他那样，他是卡塞尔最强的几个人之一。"\n\n"你加入执行部了吗？"\n\n诺诺摇摇头："还没。但……可能迟早的事。加入执行部意味着你随时可能被派去执行危险任务。生还率……"她没有说下去。\n\n她看了看时间："哦，下午有龙族历史课，别忘了去。芬格尔教授的课，他虽然疯疯癫癫的，但讲的东西很有意思。"`,
+
+      effects: { flag: 'know_about_exec', affection: { '诺诺': 5 } },
+      choices: [
+        { text: '去上龙族历史课', next: 'history_class', effects: { flag: 'went_to_history' } },
+        { text: '先去图书馆查资料', next: 'library_first', effects: { flag: 'go_library' } }
+      ]
+    },
+
+    library_first: {
+      id: 'library_first',
+      chapter: 1,
+      location: 'library',
+      narrative: `卡塞尔学院的图书馆比你想象中大了十倍。一排排高耸的书架上，塞满了关于龙族的书籍——有些书脊上印着你认不出的文字。\n\n你找到了一本《混血种血统评级详解》，翻到了关于S级的章节：\n\n"S级：血统纯度在90%以上。此类混血种拥有接近纯血龙族的力量，能够使用高危言灵。注意：S级混血种的精神状态必须定期评估，龙血反噬风险极高。"\n\n你正要继续读下去，忽然感觉到一股视线。\n\n你抬起头——在书架的另一端，站着一个白裙子的女孩。她的头发是银白色的，眼睛是淡金色的，正静静地看着你。\n\n看到你注意到她，她微微歪了歪头，然后……消失了。\n\n你揉了揉眼睛。书架另一端空无一人。`,
+
+      effects: { flag: 'saw_white_girl', location: 'library' },
+      choices: [
+        { text: '追过去查看', next: 'library_mystery', effects: { flag: 'chased_mystery_girl' } },
+        { text: '继续看书，可能是自己眼花了', next: 'campus_life_intro', effects: { flag: 'dismissed_vision' } }
+      ]
+    },
+
+    library_mystery: {
+      id: 'library_mystery',
+      chapter: 1,
+      location: 'library',
+      narrative: `你绕过书架，但走廊里空无一人。只有一扇虚掩的门——门上刻着一个古老的符号：一个圆圈，中间是一条首尾相接的龙。\n\n你推开门，里面是一条向下的楼梯。阴冷的风从下方吹来，带着一股……血腥味。\n\n楼梯口挂着一块牌子：\n\n"冰窖——未经授权禁止入内"\n\n你听到下面传来铁链拖拽的声音，以及一声低沉的、不像是人类的……呼吸。`,
+
+      effects: { flag: 'found_ice_cellar' },
+      choices: [
+        { text: '下去看看', next: 'ice_cellar', effects: { flag: 'entered_ice_cellar' } },
+        { text: '先退回去，以后做好准备再来', next: 'campus_life_intro', effects: { flag: 'retreated_from_cellar' } }
+      ]
+    },
+
+    ice_cellar: {
+      id: 'ice_cellar',
+      chapter: 1,
+      location: 'library',
+      narrative: `你走下楼梯。越往下走，空气越冷。\n\n冰窖的底层是一个巨大的地下空间。四周的墙壁上镶嵌着巨大的铁门，门上刻满了封印符文。铁链从天花板垂下，吊着一些……你不想知道是什么的东西。\n\n在空间的中央，有一个巨大的铁笼。笼子里，一个少年蜷缩在角落里。他抬起头，你看到了他的脸——金色的瞳孔，苍白到几乎透明的皮肤。\n\n他朝你咧嘴一笑，露出一口尖牙：\n\n"你也是来看我的吗？"\n\n他的声音年轻得像个孩子。但他的眼睛——那双金色的眼睛里，有一种不属于人类的、古老的东西。\n\n"我叫芬里厄。"他说，"你是第一个敢走进来的新生。"`,
+
+      effects: { flag: 'met_fengli', affection: { '芬里厄': 10 } },
+      choices: [
+        { text: '"你……被关在这里？"', next: 'fengli_talk', effects: { flag: 'talked_fengli', affection: { '芬里厄': 5 } } },
+        { text: '转身离开——这个东西太危险了', next: 'campus_life_intro', effects: { flag: 'fled_from_fengli' } }
+      ]
+    },
+
+    fengli_talk: {
+      id: 'fengli_talk',
+      chapter: 1,
+      location: 'library',
+      narrative: `"算是吧。"芬里厄坐在地上，双手抱着膝盖，"他们说我是……龙。或者说是龙的容器。"\n\n他歪着头看你："你不怕我？"\n\n"应该怕吗？"\n\n芬里厄笑了："不知道。我自己也不知道我是什么。我只知道……我有时候会做梦，梦到天空是红色的，大地在燃烧。我站在尸山血海上，所有人都怕我。"\n\n他的笑容变得有些悲伤："但我连这个笼子都出不去。"\n\n远处传来脚步声。\n\n"有人来了。"芬里厄说，"你该走了。下次来的时候，给我带点吃的——这里的营养液难喝死了。"\n\n他冲你眨眨眼。`,
+
+      effects: { flag: 'talked_fengli_deep', affection: { '芬里厄': 15 } },
+      choices: [
+        { text: '匆匆离开，不想被人发现', next: 'campus_life_intro' },
+        { text: '坚定地说："我会再来的。"', next: 'campus_life_intro', effects: { flag: 'promised_fengli', affection: { '芬里厄': 10 } } }
+      ]
+    },
+
+    history_class: {
+      id: 'history_class',
+      chapter: 1,
+      location: 'classroom',
+      narrative: `龙族历史课的教室是一个古老的阶梯教室。墙上挂满了各个时期人类与龙族战争的画作。\n\n芬格尔教授是个头发乱糟糟的老人，穿着沾满粉笔灰的西装。他一进门就踩到了讲台边的书堆上，差点摔倒。\n\n"啊，新生！"他扶了扶眼镜，"欢迎来到龙族历史课。今天我们来聊聊——龙王们。"\n\n他在黑板上画了一个圆：\n\n"龙族有四大君王：青铜与火之王、大地与山之王、海洋与水之王、天空与风之王。它们各自统领一支龙族，在远古时代与人类争夺这个世界的统治权。"\n\n"后来呢？"\n\n"后来……人类赢了。"芬格尔的表情变得复杂，"但只是暂时的。龙族在沉睡，但它们终将醒来。而我们的任务——就是在它们醒来之前，找到它们……消灭它们。"`,
+
+      effects: { flag: 'took_history_class' },
+      choices: [
+        { text: '"龙王真的可以被杀死吗？"', next: 'history_question', effects: { flag: 'asked_about_king' } },
+        { text: '下课后去训练场练习', next: 'training_first', effects: { flag: 'go_training' } }
+      ]
+    },
+
+    history_question: {
+      id: 'history_question',
+      chapter: 1,
+      location: 'classroom',
+      narrative: `芬格尔听到你的问题，沉默了几秒。\n\n"好问题。"他说，"龙王到底能不能被杀死？历史上，我们杀死过龙王。但不是用普通的武器——只有特定的武器、特定的言灵、在特定的情况下，才能真正杀死一个龙王。"\n\n"而且，"芬格尔压低声音，"就算你杀死了它们的肉体，龙王的灵魂也不会消散。它们会在某个地方沉睡，等待重生。"\n\n"那怎么才能真正杀死一个龙王？"\n\n芬格尔看着你，那双浑浊的老眼中闪过一丝锐利的光芒：\n\n"这就是卡塞尔一直在寻找的答案。"`,
+
+      effects: { flag: 'asked_king_death' },
+      choices: [
+        { text: '下课后去训练场', next: 'training_first' },
+        { text: '去找昂热校长谈谈', next: 'talk_angers_office', effects: { flag: 'visit_angers' } }
+      ]
+    },
+
+    training_first: {
+      id: 'training_first',
+      chapter: 1,
+      location: 'training',
+      narrative: `训练场上，几个高年级生正在对战。他们的速度快得惊人——你看到一个人影闪过，木刀在空中留下残影，对手已经被击倒在地。\n\n"新生？来试试？"一个穿着训练服的学长朝你招手。\n\n你接过木刀。手感很沉——这是一把真正的日本刀的重量。\n\n"别紧张，"学长说，"让我看看你的底子。"\n\n他摆出进攻姿势。\n\n你的心跳加速。血液中似乎有什么东西在涌动——你感觉视野变得清晰了，对方的动作在你眼中变得……慢了。`,
+
+      effects: { flag: 'first_training' },
+      choices: [
+        {
+          text: '主动出击',
+          hint: '先发制人',
+          next: 'training_combat',
+          effects: { flag: 'aggressive_training' }
+        },
+        {
+          text: '防守，观察对方的动作',
+          hint: '知己知彼',
+          next: 'training_defense',
+          effects: { flag: 'defensive_training' }
+        }
+      ]
+    },
+
+    training_combat: {
+      id: 'training_combat',
+      chapter: 1,
+      location: 'training',
+      narrative: `你主动发起进攻。木刀破空而出，速度快得连你自己都惊讶。\n\n学长侧身避开，但你的刀锋擦过他的肩膀——他踉跄了一步，脸上露出惊讶的表情。\n\n"好快！"他说，"你真的是新生？"\n\n你没有回答，因为在你眼中，他的动作还在变慢。你甚至能看到他下一步的意图——他的重心在向右偏移，准备反击。\n\n你提前做出了反应。\n\n五分钟后，学长坐在地上喘着粗气，而你还站着。\n\n"S级……果然名不虚传。"他苦笑着说。`,
+
+      effects: { flag: 'won_training', location: 'training' },
+      choices: [
+        { text: '继续训练，提升实力', next: 'campus_life_intro', effects: { flag: 'keep_training' } },
+        { text: '去找楚子航请教剑术', next: 'find_chuzihang_sword', effects: { flag: 'seek_chu_sword', affection: { '楚子航': 5 } } }
+      ]
+    },
+
+    training_defense: {
+      id: 'training_defense',
+      chapter: 1,
+      location: 'training',
+      narrative: `你摆出防守姿态，仔细观察着对方的每一个动作。\n\n学长试探性地出了一刀——你格挡住了。他又出了第二刀——你又挡住了。\n\n但你发现，你的防守虽然稳健，却始终找不到反击的机会。你的血统给了你超人的感知力，但你的身体还没有跟上。\n\n"不错，"学长说，"基本功扎实。但你太被动了——在真正的战斗中，防守是无法取胜的。"\n\n他收刀："去找楚子航吧，他的剑术是学院里最好的。也许他能教你一些东西。"`,
+
+      effects: { flag: 'defense_training', location: 'training' },
+      choices: [
+        { text: '去找楚子航请教', next: 'find_chuzihang_sword', effects: { flag: 'seek_chu_sword', affection: { '楚子航': 5 } } },
+        { text: '继续自己练习', next: 'campus_life_intro' }
+      ]
+    },
+
+    find_chuzihang_sword: {
+      id: 'find_chuzihang_sword',
+      chapter: 1,
+      location: 'training',
+      narrative: `你在训练场的角落找到了楚子航。他正在独自练习挥刀，一刀又一刀，动作精准得像机器。\n\n"有事？"他停下动作，但没有看你。\n\n"想请教剑术。"\n\n楚子航沉默了几秒，然后说："剑术没有捷径。每天挥刀一万次，十年后你就会了。"\n\n他转过头，金色的瞳孔在昏暗中发着光："但你的问题不是剑术。你的问题是——你还不确定自己要为什么而战。"\n\n他收刀入鞘："等你想明白了，再来找我。"\n\n他提起琴盒，转身离开。`,
+
+      effects: { flag: 'talked_chu_sword', affection: { '楚子航': 5 } },
+      choices: [
+        { text: '留在训练场，开始挥刀练习', next: 'campus_life_intro', effects: { flag: 'started_sword_practice' } },
+        { text: '去天台思考楚子航的话', next: 'roof_think', effects: { flag: 'went_to_roof' } }
+      ]
+    },
+
+    roof_think: {
+      id: 'roof_think',
+      chapter: 1,
+      location: 'roof',
+      narrative: `学院天台的风很大。从这里可以看到整个卡塞尔山谷的全貌——灰色的城堡、绿色的树林、远处的山脉。\n\n你靠在栏杆上，想着楚子航的话。\n\n你要为什么而战？为了人类？为了卡塞尔？还是……为了自己？\n\n身后传来脚步声。\n\n"在想什么？"是诺诺。\n\n她没有等你回答，走到你身边，看着远方的风景：\n\n"我刚来卡塞尔的时候也经常来这里。这里能看到整个学院，但又离它很远。适合想事情。"\n\n她沉默了一会儿，然后说：\n\n"我不知道你正在为什么而困惑。但记住——答案不在过去，在未来。不管你是什么血统、什么身份，决定你成为什么样的人的，是你的选择。"\n\n她拍了拍你的肩膀，转身离开。`,
+
+      effects: { flag: 'thought_on_roof', affection: { '诺诺': 5 } },
+      choices: [
+        { text: '回到宿舍，准备明天的课程', next: 'campus_life_intro' }
+      ]
+    },
+
+    // ========== 古德里安教授 & 路鸣泽幻境 ==========
+    gudelian_interview: {
+      id: 'gudelian_interview',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `CC1000次列车的包厢里，一个头发乱糟糟、戴着厚眼镜的中年男人正兴奋地翻着一叠文件。\n\n"你就是{name}吧？"他抬起头，笑容灿烂得像见了亲人，"我是古德里安，卡塞尔学院招生办主任！终于等到你了！"\n\n他太热情了，让你有点不适应。但他接下来的话让你的注意力完全集中了起来——\n\n"龙族，不是神话里的生物，而是曾经统治过这个世界的真实存在。"古德里安推了推眼镜，"它们拥有远超人类的智慧和力量，掌握着被称为'言灵'的超自然能力。人类和龙族的战争持续了上万年。"\n\n"而我们混血种——人类和龙族的混血后代——就是站在两个种族之间的存在。卡塞尔学院的使命，就是培养混血种成为屠龙者，在龙族苏醒之前……阻止它们。"\n\n你的脑海中忽然闪过一个画面——\n\n天空是血红色的。一望无际的尸山血海上，一条黑色的巨龙盘旋在天际。它的翅膀遮蔽了太阳，每一次呼吸都带来雷霆。无数人在它面前跪倒……\n\n"喂？喂——你还好吗？"\n\n古德里安的声音把你拉回现实。你发现自己满头冷汗，手心全是汗。\n\n"你……你刚才看到了什么？"古德里安的表情变得严肃起来。`,
+
+      effects: { flag: 'met_gudelian' },
+      choices: [
+        { text: '"我看到了……一条黑色的龙。"', next: 'lumingze_vision', effects: { flag: 'saw_black_dragon_vision' } },
+        { text: '"没什么，可能是太累了。"', next: 'lumingze_vision', effects: { flag: 'hid_vision' } }
+      ]
+    },
+
+    lumingze_vision: {
+      id: 'lumingze_vision',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `古德里安的表情变得更加凝重："你看到的……可能是你血脉中的记忆。混血种的血统纯度越高，越容易在特定条件下触发血脉记忆。"\n\n"那是……什么龙？"\n\n"黑王。"古德里安压低声音，"尼德霍格——龙族的至高存在，所有龙类的始祖。它在数千年前被封印，但它的死亡……可能只是假象。"\n\n你正想追问，忽然感到一阵晕眩。\n\n世界像水波一样扭曲。\n\n你站在一片虚空之中。面前是一个穿着黑色西装的小男孩——看起来不过十几岁，却有着一双深邃得不像孩子的金色眼睛。\n\n"哥哥。"他微笑着说。\n\n"你……你是谁？"\n\n"我是路鸣泽，"小男孩歪了歪头，"你的弟弟。不过你还记不得我——没关系，我们有的是时间。"\n\n他走近你，在你耳边轻声说：\n\n"记住，哥哥。当你有需要的时候，只要呼唤我的名字——我会帮你……但每帮你一次，你就要付出四分之一的代价。"\n\n周围的虚空碎裂了。你回到了列车上。古德里安正焦急地摇着你的肩膀。\n\n"谢天谢地，你醒了！"他松了一口气，"你刚才感觉怎么样？"\n\n"我……看到了一个男孩。"你喃喃道。\n\n古德里安的脸色变了："一个穿着黑西装的小男孩？"\n\n你点点头。\n\n古德里安没有继续追问，但你看到他握着钢笔的手在微微颤抖。`,
+
+      effects: { flag: 'met_lumingze', affection: { '路鸣泽': 10 } },
+      choices: [
+        { text: '"他是谁？"——逼问古德里安', next: 'ask_gudelian_about_boy', effects: { flag: 'asked_about_lumingze' } },
+        { text: '不再追问，看向窗外飞驰的风景', next: 'campus_arrival' }
+      ]
+    },
+
+    ask_gudelian_about_boy: {
+      id: 'ask_gudelian_about_boy',
+      chapter: 1,
+      location: 'cc1000',
+      narrative: `"那个男孩到底是谁？"你追问。\n\n古德里安沉默了很久，最后叹了口气：\n\n"我不知道该怎么解释。但……在卡塞尔的记载中，有一种现象叫做'双生子'——一些血统纯度极高的混血种，体内会诞生另一个人格。那个人格拥有龙类的记忆和力量。"\n\n"他是……我的另一个人格？"\n\n"也许。"古德里安认真地看着你，"他的存在意味着你的血统可能比我们想象的还要高。但这也意味着……你的精神世界可能比他更强大才行。否则，他会取代你。"\n\n列车开始减速。窗外出现了山谷中的城堡。\n\n"到了。"古德里安站起身，挤出一个笑容，"欢迎来到卡塞尔——你未来六年的家。"`,
+
+      effects: { flag: 'know_about_dual_personality' },
+      choices: [
+        { text: '站起身，走向车门', next: 'campus_arrival' }
+      ]
+    },
+
+    // ========== 自由一日 ==========
+    freedom_day: {
+      id: 'freedom_day',
+      chapter: 1,
+      location: 'campus',
+      narrative: `入学第三天，你被诺诺从宿舍里拽了出来。\n\n"快！今天是自由一日！"她兴奋地说。\n\n"自由一日？"\n\n"卡塞尔学院的传统——这一天学院里没有规则。学生会和狮心会会进行一场模拟战争，用弗里德里克公子赞助的弗丽嘉子弹（打中会让人短暂麻痹）。赢的人可以获得一个特权。"\n\n你被拉到了主楼前的广场上。这里已经变成了战场——\n\n凯撒·加图索站在喷泉上方，手持一把沙漠之鹰（装填着弗丽嘉子弹），金发在阳光下闪闪发光。他的身后是学生会的人马。\n\n对面，楚子航独自站在广场的另一端，手持木刀。他的身后没有一个人。\n\n"狮心会就你一个？"凯撒问。\n\n"够了。"楚子航淡淡地说。\n\n枪声响起。\n\n你看到了你一生中最不可思议的画面——楚子航的身影在子弹雨中穿梭，速度快得留下了残影。他一刀斩向凯撒，凯撒侧身避开，开枪回击……\n\n一颗流弹朝你飞来。\n\n你的瞳孔骤然收缩——那颗子弹在你眼中慢了下来，慢到你甚至能看到它旋转的轨迹。你的身体自动做出了反应。`,
+
+      effects: { flag: 'witnessed_freedom_day' },
+      choices: [
+        {
+          text: '闪开子弹',
+          hint: '你的血统在保护你',
+          next: 'freedom_day_dodge',
+          effects: { flag: 'dodged_bullet' }
+        },
+        {
+          text: '站在原地——你相信他们不敢打中新生',
+          hint: '赌一把',
+          next: 'freedom_day_stand',
+          effects: { flag: 'stood_still' }
+        },
+        {
+          text: '冲进战场帮楚子航',
+          hint: '热血上涌',
+          next: 'freedom_day_fight',
+          effects: { flag: 'joined_freedom_day', affection: { '楚子航': 10 } }
+        }
+      ]
+    },
+
+    freedom_day_dodge: {
+      id: 'freedom_day_dodge',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你的身体在意识之前就做出了反应——你以一种完全不符合人体工学的角度侧身，子弹擦着你的耳朵飞过，钉在了身后的墙上。\n\n整个战场安静了一秒。\n\n凯撒吹了声口哨："新生？反应不错。"\n\n楚子航看了你一眼，什么也没说。但你看到他嘴角似乎微微上扬了一点。\n\n诺诺从旁边冒出来，拍了拍你的肩膀："厉害啊！S级果然名不虚传！"\n\n战斗继续。最终楚子航以微弱的优势击败了凯撒——但两个人都被打得够呛。\n\n"这只是开始，楚子航。"凯撒扔掉空枪，擦了擦脸上的灰。\n\n"随时奉陪。"楚子航收刀。\n\n自由一日结束了。但你知道——你已经亲眼见识了卡塞尔学院最强的两个人。`,
+
+      effects: { flag: 'dodged', affection: { '凯撒·加图索': 5, '楚子航': 5 } },
+      choices: [
+        { text: '回宿舍休息，明天还有课', next: 'meeting_fengel', effects: { flag: 'go_dorm_after_freedom' } }
+      ]
+    },
+
+    freedom_day_stand: {
+      id: 'freedom_day_stand',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你站在原地，一动不动。\n\n子弹在你耳边呼啸而过——但没有一颗打中你。看起来凯撒和楚子航都刻意避开了新生的区域。\n\n战斗结束后，凯撒经过你身边，拍了拍你的肩膀："够胆。新生里敢在自由一日站着不动的，你是第一个。"\n\n楚子航从另一侧走过，低声说了一句："勇气可嘉。但战场上，运气不会一直在你这边。"\n\n他的语气里没有嘲讽，只有……关心？`,
+
+      effects: { flag: 'stood_still_done', affection: { '凯撒·加图索': 5, '楚子航': 5 } },
+      choices: [
+        { text: '回宿舍', next: 'meeting_fengel' }
+      ]
+    },
+
+    freedom_day_fight: {
+      id: 'freedom_day_fight',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你冲进战场。\n\n你甚至不知道自己为什么要这么做——但你的血液在沸腾，你的心脏在狂跳，你的每一个细胞都在渴望战斗。\n\n你捡起地上的一把训练匕首，朝学生会的一侧冲去。你的速度快得惊人——你闪过两个学生会的成员，一刀"砍"中了其中一个的肩膀。弗丽嘉子弹的麻痹效果让他立刻倒地。\n\n凯撒看了你一眼，眼神中闪过一丝兴致："哦？新生也来掺和？"\n\n他抬手一枪——但目标不是你，而是你身后一个打算偷袭你的学生会成员。\n\n"别打他，"凯撒说，"这是我的猎物。"\n\n你意识到——你已经卷入了卡塞尔学院最顶层的较量。`,
+
+      effects: { flag: 'fought_freedom', affection: { '楚子航': 10 } },
+      choices: [
+        { text: '战斗结束后回宿舍', next: 'meeting_fengel' }
+      ]
+    },
+
+    // ========== 芬格尔 & 室友 ==========
+    meeting_fengel: {
+      id: 'meeting_fengel',
+      chapter: 1,
+      location: 'dormitory',
+      narrative: `卡塞尔学院的学生宿舍比想象中好得多——单人间，但客厅和卫生间是共用的。\n\n你推开门，看到一个胡子拉碴的男生正盘腿坐在客厅沙发上，疯狂地按着手柄。电视屏幕上，一队星际争霸的枪兵正在和虫族大军血战。\n\n"哟！新室友？"他头也不回地说，"我叫芬格尔，卡塞尔学院在读第八年——别问为什么读了八年，问就是挂科太多。"\n\n他暂停了游戏，转过身来——一张看起来挺帅但被邋遢掩盖了的脸。\n\n"你就是那个S级新生？"他上下打量了你一番，"看起来也不怎么样嘛。"\n\n然后他笑了："开玩笑的！S级啊，我当年也是A级呢……呃，好吧，那是很久以前的事了。"\n\n他拍了拍身边的位置："来一局星际？让你见识见识什么叫真正的技术。"`,
+
+      effects: { flag: 'met_fengel', affection: { '芬格尔': 10 } },
+      choices: [
+        {
+          text: '跟他打一局星际争霸',
+          hint: '你也是高手',
+          next: 'gaming_with_fengel',
+          effects: { flag: 'played_starcraft' }
+        },
+        {
+          text: '"不了，我想去图书馆看看。"',
+          hint: '先熟悉学院环境',
+          next: 'library_explore',
+          effects: { flag: 'skip_gaming' }
+        }
+      ]
+    },
+
+    gaming_with_fengel: {
+      id: 'gaming_with_fengel',
+      chapter: 1,
+      location: 'dormitory',
+      narrative: `你在芬格尔身边坐下，选好了种族。\n\n三分钟后——你的基地被芬格尔的隐刀砍了个精光。\n\n"哈哈哈哈！"芬格尔笑得前仰后合，"新生就是新生！不过……你的操作有模有样的，以前经常玩？"\n\n"算是。"你说。\n\n"那我们在战网上加个好友呗？"芬格尔说，"我认识一个叫'老唐'的，打得贼好，改天拉你一起三黑。"\n\n他熟练地打开了战网，输入了一个ID：\n\n"老唐"——人类玩家，钻石段位，胜率68%。\n\n"这家伙操作猛如虎，"芬格尔说，"就是太爱吹牛了。每次赢了都说'弟弟们学着点'。"\n\n你记下了这个名字。`,
+
+      effects: { flag: 'gamed_with_fengel', affection: { '芬格尔': 10 } },
+      choices: [
+        { text: '加入游戏，和老唐一起打一局', next: 'online_laotang', effects: { flag: 'played_with_laotang' } },
+        { text: '该去上课了', next: 'exam_3e', effects: { flag: 'skip_online' } }
+      ]
+    },
+
+    // ========== 老唐/网游 ==========
+    online_laotang: {
+      id: 'online_laotang',
+      chapter: 1,
+      location: 'dormitory',
+      narrative: `你加入了芬格尔和老唐的队伍。\n\n耳机里传来一个爽朗的声音："哟！新人？芬格尔你小子终于找到第三个队友了？"\n\n"这是我室友，"芬格尔说，"S级新生，牛逼得很。"\n\n"S级？"老唐的语气有些微妙的变化，"卡塞尔的S级可不多见啊……有意思。"\n\n游戏开始了。\n\n你很快发现，老唐的星际水平确实很高。他的运营行云流水，操作精准得不像人类。你们三个人配合默契，连胜了三局。\n\n"不错不错！"老唐在语音里大笑，"比芬格尔那菜逼强多了！以后常来啊！"\n\n"喂！"芬格尔抗议。\n\n你笑了。这是你到卡塞尔以来最轻松的时刻。\n\n但你不知道的是——在世界的另一端，某个昏暗的房间里，一个年轻人正盯着屏幕上你的ID，若有所思。\n\n"S级……卡塞尔……有意思。"他轻声说。\n\n他是老唐。但在他血液深处，某种沉睡的东西正在苏醒。`,
+
+      effects: { flag: 'befriended_laotang', affection: { '老唐': 15, '芬格尔': 5 } },
+      choices: [
+        { text: '下线，准备明天的3E考试', next: 'exam_3e', effects: { flag: 'prepare_for_3e' } }
+      ]
+    },
+
+    // ========== 3E考试 ==========
+    exam_3e: {
+      id: 'exam_3e',
+      chapter: 1,
+      location: 'classroom',
+      narrative: `3E考试——卡塞尔学院新生最重要的考试之一。\n\n教室里安静得可怕。每个新生面前都放着一份试卷——但试卷上没有任何文字，只有一些奇怪的、扭曲的符号。\n\n"这是龙文。"监考的曼施坦因教授说，"你们不需要理解它。只需要看着它。"\n\n"看着它？"\n\n"对。龙文不是用眼睛读的，是用血统读的。"\n\n你低头看着试卷上的符号。那些扭曲的线条在你眼中开始……移动？它们像活过来一样，在你眼前扭动、重组、形成新的形状。\n\n你的脑海中响起一个声音——低沉、古老、如同大地的脉搏。那是龙文在吟唱。\n\n你不由自主地跟着那个声音默念起来。\n\n试卷上的符号发出了淡淡的金光。\n\n曼施坦因教授猛地转过身来看着你。他的表情——像是看到了什么不可思议的东西。`,
+
+      effects: { flag: 'took_3e_exam' },
+      choices: [
+        { text: '继续吟唱，让龙文的力量引导你', next: 'exam_3e_embrace', effects: { flag: 'embraced_dragon_language' } },
+        { text: '强行停止，你不想暴露太多', next: 'exam_3e_hide', effects: { flag: 'hid_dragon_ability' } }
+      ]
+    },
+
+    exam_3e_embrace: {
+      id: 'exam_3e_embrace',
+      chapter: 1,
+      location: 'classroom',
+      narrative: `你没有压制那股力量。\n\n龙文的吟唱声从你喉咙里清晰地流淌出来——那是一种不属于人类的语言，每一个音节都带着古老的力量。试卷上的金光越来越亮，最终形成了一个金色的漩涡。\n\n周围的同学都震惊地看着你。\n\n曼施坦因教授快步走到你面前，按住你的肩膀："停下！"\n\n你停了下来。但那双金色的瞳孔久久没有褪去。\n\n"你的3E考试成绩——"曼施坦因停顿了一下，"超出了量表的最高值。我需要报告校长。"\n\n他离开教室时，你听到他低声说了一句：\n\n"又一个S级……不，也许比S级更高。"`,
+
+      effects: { flag: 'exam_3e_revealed' },
+      choices: [
+        { text: '去找古德里安教授询问你的成绩', next: 'exam_result_talk', effects: { flag: 'ask_about_3e_score' } },
+        { text: '回宿舍，芬格尔应该知道这意味着什么', next: 'exam_with_fengel', effects: { flag: 'go_to_fengel_3e' } }
+      ]
+    },
+
+    exam_3e_hide: {
+      id: 'exam_3e_hide',
+      chapter: 1,
+      location: 'classroom',
+      narrative: `你咬紧牙关，强行压制住了那股冲动。\n\n龙文的金光在你眼中闪烁了一下，然后熄灭了。你保持了沉默。\n\n但曼施坦因教授还是注意到了你——他走到你桌前，看了一眼你的试卷。试卷上的符号没有任何反应——但你的瞳孔，在那一瞬间变成了金色。\n\n"有意思。"他说，没有多说什么。\n\n考试结束后，他叫住了你：\n\n"你压制了自己的血统。为什么？"\n\n"我不想……引人注目。"\n\n曼施坦因看了你一会儿："明智的选择。但在卡塞尔，隐藏实力有时候比展示实力更危险。因为别人不知道你的底牌——就会把你当成未知因素来处理。"\n\n他转身离开："如果我是你，我会在下次机会到来时，让大家看到你的真实力量。"`,
+
+      effects: { flag: 'hid_3e_power' },
+      choices: [
+        { text: '回宿舍', next: 'exam_with_fengel' }
+      ]
+    },
+
+    exam_result_talk: {
+      id: 'exam_result_talk',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你在办公室里找到了古德里安教授。他正看着你的3E考试成绩发呆。\n\n"这个数据……"他喃喃道，"一般来说，A级学生的龙文共鸣率在60%到80%之间。S级是90%以上。"\n\n"你的共鸣率——"他抬起头看着你，"是98.7%。这意味着你几乎可以和纯血龙族一样直接沟通龙文。"\n\n"这是好事还是坏事？"\n\n古德里安苦笑道："好的一面是，你的言灵潜力可能比任何在世的混血种都强。坏的一面是……你的龙血浓度太高了。你和龙王之间的界限，可能比我们想象的要薄。"\n\n"我会不会被龙血反噬？"\n\n古德里安没有回答。\n\n沉默本身就是答案。`,
+
+      effects: { flag: 'know_3e_score' },
+      choices: [
+        { text: '离开办公室，消化这个消息', next: 'library_explore', effects: { flag: 'need_to_think' } }
+      ]
+    },
+
+    exam_with_fengel: {
+      id: 'exam_with_fengel',
+      chapter: 1,
+      location: 'dormitory',
+      narrative: `芬格尔正躺在床上吃薯片。\n\n"回来了？3E考得怎么样？"他漫不经心地问。\n\n"我……可能搞砸了。"你说。\n\n芬格尔坐起来，难得地露出了认真的表情："什么叫搞砸了？"\n\n"我吟唱出了龙文。整个考场都看到了。"\n\n芬格尔沉默了几秒，然后吹了声口哨："菜鸟，你不知道吗？能直接吟唱龙文的混血种——在整个卡塞尔历史上，不超过十个人。"\n\n"而那十个人——"他压低声音，"有一个还活着，是我们的校长。有三个已经死了，被龙血反噬而死。还有六个……叛变了。"\n\n他拍了拍你的肩膀："欢迎来到高血统俱乐部。希望你运气够好。"`,
+
+      effects: { flag: 'fengel_warning' },
+      choices: [
+        { text: '去图书馆查资料，了解高血统混血种的历史', next: 'library_explore', effects: { flag: 'go_to_library' } }
+      ]
+    },
+
+    // ========== 图书馆·冰窖 ==========
+    library_explore: {
+      id: 'library_explore',
+      chapter: 1,
+      location: 'library',
+      narrative: `卡塞尔学院的图书馆比你想象中大了十倍。一排排高耸的书架上，塞满了关于龙族的书籍——有些书脊上印着你认不出的文字。\n\n你找到了一本《混血种血统评级详解》，翻到了关于S级的章节：\n\n"S级：血统纯度在90%以上。此类混血种拥有接近纯血龙族的力量，能够使用高危言灵。注意：S级混血种的精神状态必须定期评估，龙血反噬风险极高。"\n\n你正要继续读下去，忽然感觉到一股视线。\n\n你抬起头——在书架的另一端，站着一个白裙子的女孩。她的头发是银白色的，眼睛是淡金色的，正静静地看着你。\n\n看到你注意到她，她微微歪了歪头，然后……凭空消失了。\n\n你揉了揉眼睛。书架另一端空无一人。但你低头时发现地上有一片银白色的鳞片——在灯光下泛着冷冽的光。\n\n那不是人类的鳞片。`,
+
+      effects: { flag: 'library_mystery', location: 'library' },
+      choices: [
+        { text: '追过去查看', next: 'ice_cellar_door', effects: { flag: 'chased_mystery' } },
+        { text: '继续看书，可能只是幻觉', next: 'library_continue', effects: { flag: 'ignored_vision' } }
+      ]
+    },
+
+    library_continue: {
+      id: 'library_continue',
+      chapter: 1,
+      location: 'library',
+      narrative: `你摇摇头，把注意力转回书本。但那一幕一直在你脑海中挥之不去。\n\n银白色的女孩、淡金色的眼睛、凭空消失……她是谁？为什么会在图书馆里？\n\n你翻开另一本书——关于龙族四大君王的记载。\n\n"青铜与火之王·诺顿，四大君王中最暴戾的一位。它的权柄是铸造与火焰。传说它在长江水下建造了一座青铜城，将自己的王座安置其中……"\n\n你的目光在"青铜城"三个字上停住了。\n\n你有种预感——你很快就要和这位龙王打交道了。`,
+
+      effects: { flag: 'read_about_norton', location: 'library' },
+      choices: [
+        { text: '回宿舍休息', next: 'campus_life_intro' }
+      ]
+    },
+
+    ice_cellar_door: {
+      id: 'ice_cellar_door',
+      chapter: 1,
+      location: 'library',
+      narrative: `你绕过书架，在走廊尽头发现了一扇虚掩的铁门。门上刻着一个古老的符号——一个圆圈，中间是一条首尾相接的龙。\n\n这是龙族的印记。\n\n你推开门，一条向下的楼梯出现在眼前。阴冷的风从下方吹来，带着一股……血腥和钢铁的味道。\n\n楼梯口挂着一块铜牌：\n\n"冰窖（Ice Cellar）——S级权限 · 未经执行部部长授权，任何人不得入内"\n\n你听到下方传来一阵金属碰撞的声音——像是铁链在拖拽。然后是低沉的、不像是人类的呼吸声。\n\n你体内的龙血在躁动。它在呼唤你下去。`,
+
+      effects: { flag: 'found_ice_cellar' },
+      choices: [
+        { text: '下去看看', next: 'ice_cellar_deep', effects: { flag: 'entered_ice_cellar' } },
+        { text: '先退回去——没有授权就闯入太危险了', next: 'campus_life_intro', effects: { flag: 'retreated' } }
+      ]
+    },
+
+    ice_cellar_deep: {
+      id: 'ice_cellar_deep',
+      chapter: 1,
+      location: 'library',
+      narrative: `你走下楼梯。越往下走，空气越冷，血腥味也越来越重。\n\n冰窖的底层是一个巨大的地下空间。四周的墙壁上镶嵌着巨大的铁门，门上刻满了发光的封印符文。铁链从天花板垂下，吊着一些……你不确定是什么的东西。\n\n在空间的中央，有一个巨大的铁笼。笼子里，一个少年蜷缩在角落里。他听到脚步声，抬起头——\n\n他的脸苍白到几乎透明，瞳孔是金色的，嘴角带着一丝不属于人类的微笑。\n\n"你是新来的？"他的声音像少年一样清澈，"我叫芬里厄。你是第一个敢走进来的新生。"\n\n他站起来，走到铁笼边。你这才注意到他的手脚上都锁着刻满符文的镣铐。\n\n"他们说我是一条龙。"他歪着头看你，"你觉得呢？"\n\n远处传来脚步声。芬里厄的笑容收敛了："有人来了。你该走了——不过下次来的时候，能给我带点吃的吗？这里的营养液……太难喝了。"\n\n他冲你眨了眨眼睛。那个瞬间，你真的在他身后看到了一对巨大的、半透明的金色翅膀。`,
+
+      effects: { flag: 'met_fengli', affection: { '芬里厄': 15 } },
+      choices: [
+        { text: '匆匆离开，不想被人发现', next: 'campus_life_intro' },
+        { text: '坚定地说："我会再来的。"', next: 'campus_life_intro', effects: { flag: 'promised_fengli', affection: { '芬里厄': 10 } } }
+      ]
+    },
+
+    // ========== 校园生活过渡 ==========
+    campus_life_intro: {
+      id: 'campus_life_intro',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你在卡塞尔学院的第一周就这样过去了。\n\n你上了龙族历史课、炼金术入门、格斗训练……每一天都在接触一个全新的世界。你认识了更多的人——有友好的、有冷漠的、有深藏不露的。\n\n你也在战网上和老唐成了固定队友。每天晚上，你和芬格尔、老唐三个人一起打星际争霸。老唐的操作一如既往地犀利，但他的话语中偶尔会流露出一种……不属于普通游戏玩家的沧桑感。\n\n"老唐，你到底是做什么的？"有一次你问。\n\n"我？"老唐在语音里笑了笑，"一个……四处旅行的古董商人。专门倒卖那些"不该存在"的东西。"\n\n"不该存在的东西？"\n\n"比如说——刻着龙文的青铜器。"\n\n你的心猛地跳了一下。\n\n"开玩笑的！"老唐大笑，"你这也信？"\n\n但你知道——他不完全是在开玩笑。\n\n这天，施耐德教授在走廊里叫住了你：\n\n"有一个任务，"他说，"需要你去执行。"\n\n"什么任务？"\n\n"三峡水库。我们的探测设备在那里的水下检测到了强烈的龙类反应。"施耐德的表情严肃，"可能是龙王。"\n\n他终于说出了那个词：\n\n"青铜与火之王。"`,
+
+      effects: { flag: 'first_mission', chapter: 1, location: 'campus' },
+      choices: [
+        {
+          text: '"我去。"——毫不犹豫地接下任务',
+          hint: '这是证明自己的机会',
+          next: 'mission_three_gorges',
+          effects: { flag: 'accepted_mission' }
+        },
+        {
+          text: '"我需要准备一下。"——先做功课再出发',
+          hint: '知己知彼',
+          next: 'mission_preparation',
+          effects: { flag: 'prepare_mission' }
+        }
+      ]
+    },
+
+    mission_preparation: {
+      id: 'mission_preparation',
+      chapter: 1,
+      location: 'library',
+      narrative: `你用了一天时间在图书馆查阅关于青铜与火之王的资料。\n\n根据古籍记载，青铜与火之王是四大龙王中最好战的一位。它在远古时代就被封印——而封印的地点，据说就在中国长江的水底。\n\n你还找到了一个重要的信息：青铜与火之王有一个弱點——它的权柄与"锻造"有关。它的力量来自于金属和火焰，如果能在没有金属的环境中战斗……\n\n你把这条信息记在了心里。\n\n出发那天，施耐德在校门口等你。同行的还有——\n\n楚子航站在车边，肩上斜挎着那个黑色的琴盒。\n\n"我和你一起去。"他说。`,
+
+      effects: { flag: 'prepared_mission', affection: { '楚子航': 10 } },
+      choices: [
+        { text: '"走吧。"——和楚子航一起出发', next: 'mission_three_gorges', effects: { flag: 'go_with_chu' } }
+      ]
+    },
+
+    // ========== 三峡任务（Book I 高潮） ==========
+    // ========== 老唐的真实身份 ==========
+    laotang_reveal: {
+      id: 'laotang_reveal',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `在你出发前往三峡之前，你给老唐发了一条消息："我最近要去出差，可能上不了线了。"\n\n老唐的回复很快："出差？去哪？"\n\n"三峡。"\n\n那之后，老唐沉默了整整五分钟。然后他发来一条消息：\n\n"……{name}，有件事我一直没告诉你。我不是什么古董商人。"\n\n"我……我不知道该怎么解释。但如果你在三峡水下看到一座青铜城——不要进去。"\n\n你的血液凝固了。\n\n"你怎么知道三峡水下有青铜城？"你打字的手在颤抖。\n\n没有回复。\n\n老唐的ID变灰了。他下线了。\n\n你突然意识到——\n\n老唐从来不 sick。他的操作精准得像机器。他对龙族的事情有着超乎寻常的了解。他从不谈论自己的过去。\n\n一个可怕的念头浮现在你脑海中。\n\n你拨通了古德里安的电话："教授，龙王诺顿……有没有可能以人类的形态存在？"\n\n电话那头沉默了。\n\n"理论上……"古德里安的声音变得艰难，"龙王的灵魂可以在人类的身体中重生。那个人甚至可能不知道自己是谁，直到龙血完全苏醒。"\n\n"如果那个人来到了三峡呢？"\n\n"那就意味着——诺顿要回家了。"`,
+
+      effects: { flag: 'know_laotang_truth' },
+      choices: [
+        { text: '带着这个秘密前往三峡', next: 'mission_three_gorges', effects: { flag: 'go_three_gorges_with_secret' } },
+        { text: '试图联系老唐，劝他不要来', next: 'try_stop_laotang', effects: { flag: 'try_warn_laotang' } }
+      ]
+    },
+
+    try_stop_laotang: {
+      id: 'try_stop_laotang',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你疯狂地给老唐打电话，但全部无人接听。\n\n你给他发语音消息："老唐！不管你是谁——不要来三峡！我们可以想办法帮你！"\n\n几分钟后，你收到了一条简短的回复：\n\n"太迟了，兄弟。"\n\n"我已经在路上了。"\n\n你的心沉到了谷底。`,
+
+      effects: { flag: 'warned_laotang' },
+      choices: [
+        { text: '出发去三峡', next: 'mission_three_gorges' }
+      ]
+    },
+
+    mission_three_gorges: {
+      id: 'mission_three_gorges',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `长江三峡，夜色如墨。\n\n你们站在水库岸边。水面平静得像一面黑色的镜子，但水下探测器的读数显示——下方三百米处，有巨大的生物反应。\n\n"龙王就在下面。"施耐德的声音从通讯器里传来，"你们的任务是在它完全苏醒之前，用封印装置将其镇压。"\n\n楚子航站在你身边，琴盒打开，露出了里面的刀。月光照在刀身上，反射出冷冽的光芒。\n\n"害怕吗？"他问。\n\n"有一点。"\n\n"那就对了。"楚子航说，"不害怕的人，活不长。"\n\n水面开始沸腾。巨大的气泡从水底涌上来，带着硫磺的气味。水下有什么东西在发光——暗红色的光，像地下深处翻涌的岩浆。\n\n"它来了。"楚子航握紧了刀。`,
+
+      choices: [
+        {
+          text: '和楚子航一起准备战斗',
+          hint: '并肩作战',
+          next: 'combat_dragon_bronze',
+          effects: { flag: 'fight_together_chu' }
+        },
+        {
+          text: '先观察龙王的动静，寻找弱点',
+          hint: '古籍中可能有提示',
+          next: 'observe_dragon_first',
+          effects: { flag: 'observe_first' }
+        }
+      ]
+    },
+
+    observe_dragon_first: {
+      id: 'observe_dragon_first',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你按住楚子航的手："等等。"\n\n水面的沸腾越来越剧烈。一个巨大的身影从水下浮现——那是……一扇门？\n\n一扇青铜门，从水底升起，高达数十米。门上刻满了古老的符文——那是龙文。\n\n"这不是龙王本体，"你说，"这是封印之门。龙王被封印在这扇门后面。"\n\n但门上的符文正在一条条熄灭——封印正在减弱。\n\n"需要加固封印，"你快速说道，"用炼金术。"\n\n楚子航看了你一眼："你会炼金术？"\n\n"学了一点。"\n\n你走向那扇青铜门。门上的符文在你眼中变得清晰——你仿佛能读懂它们的含义。你的手不自觉地抬起，指尖在空气中划出复杂的轨迹。\n\n龙文在你口中吟唱出来——你自己都不知道你是怎么会的。\n\n符文重新亮起，一一点燃。青铜门缓缓沉入水底。\n\n水面恢复了平静。`,
+
+      effects: { flag: 'sealed_bronze_gate', location: 'three_gorges' },
+      choices: [
+        { text: '和楚子航撤离，任务完成', next: 'post_three_gorges', effects: { flag: 'seal_success', affection: { '楚子航': 10 } } }
+      ]
+    },
+
+    combat_dragon_bronze: {
+      id: 'combat_dragon_bronze',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `水面炸裂。\n\n一个巨大的身影从水下冲出——那是一条青铜色的巨龙，浑身覆盖着金属般的鳞片，眼睛是两团燃烧的火焰。\n\n青铜与火之王——诺顿。\n\n它发出震耳欲聋的咆哮，高温的气浪将你掀飞出去。楚子航稳住身形，拔刀冲上——村雨的刀光在夜空中划出一道银线，斩在龙王的鳞片上，迸出一串火星。\n\n"它的鳞片太硬了！"楚子航喊道。\n\n你明白，硬拼没有胜算。你闭上眼睛，感受着血液中涌动的力量——你的言灵在苏醒。\n\n当你睁开眼睛时，世界变成了金色。\n\n你的言灵——发动。`,
+
+      effects: { flag: 'combat_norton', location: 'three_gorges' },
+      choices: [
+        { text: '使用攻击型言灵全力攻击', next: 'spirit_attack_dragon', effects: { flag: 'use_offensive_spirit' } },
+        { text: '使用封印言灵尝试压制龙王', next: 'seal_dragon', effects: { flag: 'use_seal_spirit' } }
+      ]
+    },
+
+    spirit_attack_dragon: {
+      id: 'spirit_attack_dragon',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你的言灵爆发了。\n\n金色的光芒从你体内喷涌而出，形成一道巨大的光柱，直冲云霄。龙王发出了痛苦的咆哮——它的鳞片在光芒中开始龟裂。\n\n楚子航抓住机会，持刀跃起——村雨贯穿了龙王胸口的裂缝。\n\n龙王发出一声震天的怒吼，整个三峡都在颤抖。然后——它的身体开始崩塌，化为漫天的灰烬，落入长江之中。\n\n你和楚子航站在岸边，喘着粗气。\n\n"死了吗？"你问。\n\n楚子航看着逐渐平静的水面："龙王的肉体被摧毁了。但它的灵魂……逃走了。"\n\n他收刀入鞘："不过，至少我们赢了这一仗。"`,
+
+      effects: { flag: 'killed_norton_body', location: 'three_gorges' },
+      combat: {
+        enemies: [{ id: 'norton', name: '青铜与火之王·诺顿', hp: 80, atk: 12, ac: 16, mdef: 10, expReward: 100 }]
+      },
+      choices: [
+        { text: '返回学院报告任务', next: 'post_three_gorges', effects: { flag: 'return_to_campus' } }
+      ]
+    },
+
+    seal_dragon: {
+      id: 'seal_dragon',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你双手结印，言灵之力化作金色的锁链，从四面八方缠向龙王。\n\n诺顿挣扎着，火焰从它身上喷涌而出，试图烧断锁链。但你咬紧牙关，血统之力全开——锁链越收越紧，最终将龙王牢牢捆住。\n\n它愤怒地咆哮着，被拖回了水下的青铜门中。门扉轰然关闭，封印符文重新亮起。\n\n水面恢复了平静。\n\n楚子航看着你，眼中闪过一丝惊讶："你封印了龙王。"\n\n你瘫坐在地上，浑身脱力。但你知道——这只是暂时的。封印总有一天会再次松动。到时候，需要更强的力量来彻底消灭它。`,
+
+      effects: { flag: 'sealed_norton', location: 'three_gorges' },
+      choices: [
+        { text: '返回学院', next: 'post_three_gorges', effects: { flag: 'return_after_seal' } }
+      ]
+    },
+
+    // ========== 高潮：龙王诺顿 ==========
+    combat_norton_climax: {
+      id: 'combat_norton_climax',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `三峡的水面炸裂开来。\n\n一座巨大的青铜城从水底升起——那是龙王诺顿的王座，一座由青铜铸就的宫殿，布满了龙文和古老的图腾。在青铜城的顶端，站着一个你熟悉的身影。\n\n老唐。\n\n不——那已经不是老唐了。他的眼睛燃烧着金色的火焰，皮肤上浮现出青铜色的鳞片纹路。他的头顶升起了一对弯曲的角。\n\n"诺顿……青铜与火之王。"楚子航握紧了村雨，低声说。\n\n老唐——不，诺顿——低头看着你们。他的表情中混杂着痛苦和愤怒。\n\n"{name}……"他的声音变得沙哑而古老，"我不想伤害你。但这是我回家的路——我已经等了一万年。"\n\n他抬起手。空气开始燃烧。整个三峡的温度骤然升高了十几度。\n\n楚子航拔刀冲了上去——但诺顿随手一挥，一道火焰将楚子航击飞了出去。\n\n你站在原地，看着老唐——你的朋友——变成了龙王。\n\n你的血液在沸腾。你的脑海中响起了路鸣泽的声音：\n\n"哥哥，你需要我的帮助。"\n\n"代价是四分之一的生命——你愿意付吗？"`,
+
+      effects: { flag: 'confront_norton' },
+      choices: [
+        {
+          text: '呼唤路鸣泽——付出四分之一的代价换取力量',
+          hint: '"帮我。"',
+          next: 'lumingze_deal_climax',
+          effects: { flag: 'made_deal_with_lumingze' }
+        },
+        {
+          text: '拒绝交易——用自己现有的力量战斗',
+          hint: '"我不能拿命去赌。"',
+          next: 'fight_norton_alone',
+          effects: { flag: 'refused_deal' }
+        },
+        {
+          text: '试图和老唐交流——唤醒他的人性',
+          hint: '"老唐！你他妈的清醒一点！"',
+          next: 'talk_to_laotang_final',
+          effects: { flag: 'try_save_laotang' }
+        }
+      ]
+    },
+
+    lumingze_deal_climax: {
+      id: 'lumingze_deal_climax',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `"帮我。"你说。\n\n世界静止了。\n\n路鸣泽出现在你面前，穿着一尘不染的黑色西装，金色的眼睛带着笑意。\n\n"成交。"他伸出手，"四分之一的你——归我。"\n\n你握住了他的手。\n\n那一刻，你感觉到一股前所未有的力量从身体深处喷涌而出。你的瞳孔变成了纯粹的熔金色。你的言灵——那个你从未完全掌握的言灵——在这一刻完全觉醒了。\n\n你的周围产生了巨大的气压，水面被压出一个巨坑。楚子航不得不后退几步才能站稳。\n\n诺顿——老唐——看着你，金色的眼中闪过一丝惊讶：\n\n"你……你是那个人的……"他没有说完。\n\n你的言灵爆发了。\n\n一道金色的光柱从你身上冲天而起，将整个三峡照得如同白昼。诺顿的火焰在你面前退缩了——你的力量，竟然压制了龙王。\n\n"结束了，诺顿。"你说。`,
+
+      effects: { flag: 'used_lumingze_power', chapter: 1 },
+      combat: {
+        enemies: [{ id: 'norton_final', name: '青铜与火之王·诺顿（完全体）', hp: 120, atk: 15, ac: 18, mdef: 12, expReward: 200 }]
+      },
+      choices: [
+        { text: '发动最终一击', next: 'norton_defeated', effects: { flag: 'defeated_norton_with_power' } }
+      ]
+    },
+
+    fight_norton_alone: {
+      id: 'fight_norton_alone',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你咬紧牙关，用自己的力量迎了上去。\n\n诺顿的火焰铺天盖地地涌来——你侧身闪过，言灵的力量在掌心凝聚。你没有路鸣泽的帮助，但你有一个S级混血种的全部潜能。\n\n你冲向诺顿。\n\n战斗持续了十分钟。你的身上布满了烧伤，体力接近极限。但诺顿也不好受——他身上的鳞片被你打碎了好几处。\n\n"你……很强。"诺顿说，语气中带着一丝欣赏，"比我想象的强。"\n\n"但我还没用全力。"\n\n他张开嘴——一道金色的火焰正在他喉咙深处凝聚。那是足以熔化一切的高温。\n\n就在这时——\n\n诺顿的表情忽然扭曲了。他的左眼中闪过一丝……熟悉的、属于"老唐"的光芒。\n\n"{name}……快……"他的声音断断续续，"我……压不住它了……杀了我……"\n\n他的身体在龙王和人类之间剧烈地切换。他在用自己的意识压制动物的本能。\n\n"趁我……还是我……"老唐——诺顿——艰难地说，"动手。"`,
+
+      effects: { flag: 'fought_norton_alone' },
+      choices: [
+        { text: '含泪发动致命一击', next: 'norton_defeated_sad', effects: { flag: 'killed_laotang' } },
+        { text: '试图封印而不是杀死他', next: 'seal_norton_final', effects: { flag: 'sealed_laotang' } }
+      ]
+    },
+
+    talk_to_laotang_final: {
+      id: 'talk_to_laotang_final',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你冲上前去，站在诺顿面前，直视着他金色的眼睛。\n\n"老唐！你还记得吗？星际争霸、通宵的排位赛、赢了之后你的大笑——那不是龙王的记忆，那是你的！"\n\n诺顿的身体僵住了。\n\n"一起打游戏的时光……是真的。"一个微弱的声音从他喉咙里传出来——那是老唐的声音。"那些……不是假的。"\n\n他的眼中闪过一丝清明。\n\n"谢谢你……{name}。"老唐——诺顿——露出了一个人类的笑，"谢谢你把我当朋友。"\n\n然后他的表情变得痛苦："但我压不住它了……龙王要完全觉醒了。在我彻底变成它之前——"\n\n"封印我。"`,
+
+      effects: { flag: 'talked_to_laotang' },
+      choices: [
+        { text: '用言灵将他封印', next: 'seal_norton_final', effects: { flag: 'sealed_after_talk' } }
+      ]
+    },
+
+    seal_norton_final: {
+      id: 'seal_norton_final',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你双手结印，言灵之力化作金色的锁链，将诺顿层层缠绕。他没有反抗。\n\n"谢谢。"他——或者说老唐——说。\n\n青铜城缓缓沉入水底。诺顿被封印在龙座上，陷入了又一次的长眠。\n\n你瘫坐在地上，浑身脱力。楚子航走过来，沉默地把手放在你肩上。\n\n"你做得很对。"他说，"有时候，最好的结局……不是杀死敌人，而是拯救朋友。"\n\n你看着平静的水面。\n\n老唐还在那里——在青铜城中，在龙王的躯壳里，沉睡着。\n\n也许有一天，你会找到办法真正地救他。`,
+
+      effects: { flag: 'sealed_norton_kindly', location: 'three_gorges' },
+      choices: [
+        { text: '返回学院', next: 'post_three_gorges' }
+      ]
+    },
+
+    norton_defeated: {
+      id: 'norton_defeated',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你的全力一击贯穿了诺顿的胸口。\n\n青铜与火之王发出一声震天的怒吼——然后他的身体开始崩塌。青铜色的鳞片一片片剥落，化为灰烬。他的身体在金色的火焰中燃烧，最终……化为虚无。\n\n你站在原地，喘着粗气。路鸣泽的力量正在退去——你感到一阵前所未有的虚弱。\n\n"王死了。"楚子航来到你身边，低声说。\n\n但你没有胜利的喜悦。你只感到一种……巨大的空虚。\n\n在诺顿消失的地方，地面上刻着一行字——是用指甲刻的：\n\n"谢谢你，兄弟。"\n\n那是老唐留给你最后的话。`,
+
+      effects: { flag: 'killed_norton', location: 'three_gorges' },
+      choices: [
+        { text: '返回卡塞尔学院', next: 'post_three_gorges' }
+      ]
+    },
+
+    norton_defeated_sad: {
+      id: 'norton_defeated_sad',
+      chapter: 1,
+      location: 'three_gorges',
+      narrative: `你的武器刺穿了诺顿的心脏。\n\n龙王的瞳孔骤然收缩。然后——金色的火焰从伤口中喷涌而出，将他的身体燃烧殆尽。\n\n在火焰熄灭前的最后一刻，你看到了老唐的脸——他微笑着，像是解脱了。\n\n"能认识你……真好。"\n\n然后他消失了。\n\n你跪在地上。你的双手沾满了灰烬——那曾是你朋友的一部分。\n\n楚子航什么也没说，只是站在你身边。有时候，陪伴本身就是最好的安慰。\n\n过了很久，你站起来。你的脸上没有泪，但你的心在流血。\n\n你知道，你会永远记住老唐——那个在星际争霸里跟你并肩作战的兄弟。`,
+
+      effects: { flag: 'killed_laotang_sadly', location: 'three_gorges' },
+      choices: [
+        { text: '返回卡塞尔学院', next: 'post_three_gorges' }
+      ]
+    },
+
+    // ========== 第一章结尾 ==========
+    post_three_gorges: {
+      id: 'post_three_gorges',
+      chapter: 1,
+      location: 'campus',
+      narrative: `你回到了卡塞尔学院。\n\n三峡的任务让你在学院里名声大噪——学生们看你的眼神里多了一份敬畏。但你知道真正的代价是什么。\n\n如果你和老唐做了交易——你低头看着自己的手。路鸣泽拿走了你四分之一的寿命。你不知道那是多少年——十年？二十年？还是更久？\n\n但至少你还活着。老唐……诺顿……他得到了安息。如果他没有死，而是被封印了——那你还有机会找到救他的办法。\n\n昂热校长在他的办公室里召见了你。\n\n"你做得很好，"他说，"比我预想的好。"\n\n他走到窗边，看着远方的山脉：\n\n"龙族有四位君王。青铜与火之王只是第一个。大地与山之王、海洋与水之王、天空与风之王……它们都在苏醒。"\n\n他转过身，目光如炬：\n\n"你准备好面对它们了吗？"\n\n窗外，夜色降临。卡塞尔学院的钟楼敲响了十一下。\n\n你知道，属于你的战争，才刚刚开始。\n\n而在世界的某个角落——一个穿着黑色西装的小男孩正微笑着，金色的眼睛在黑暗中闪闪发光。\n\n"哥哥……你做得很好。"\n\n"但我拿走的东西——永远都不会还给你了。"`,
+      effects: { flag: 'chapter1_complete', chapter: 2, location: 'campus' },
+      choices: [
+        {
+          text: '选择阵营——加入狮心会（楚子航的阵营）',
+          hint: '追求最强的力量',
+          next: 'chapter2_slytherin',
+          effects: { flag: 'join_leonheart', affection: { '楚子航': 15, '凯撒·加图索': -5 } }
+        },
+        {
+          text: '选择阵营——加入学生会（凯撒的阵营）',
+          hint: '追求荣耀与名望',
+          next: 'chapter2_student_union',
+          effects: { flag: 'join_student_union', affection: { '凯撒·加图索': 15, '楚子航': -5 } }
+        },
+        {
+          text: '保持独立，走自己的路',
+          hint: '不依附于任何人',
+          next: 'chapter2_independent',
+          effects: { flag: 'stay_independent' }
+        }
+      ]
+    }
+  }
+};
+
+// 简化场景数据中缺少的引用场景
+// 这些场景会在游戏运行时由AI引擎生成
+// 包括：talk_angers_office, chapter2_slytherin, chapter2_student_union, chapter2_independent
+// 以及所有后续的龙族II和龙族III剧情
+</script>
+<script>/* ========================================
+   UU模拟器 - 游戏大厅
+   ======================================== */
+
+Router.register('home', async () => {
+  const user = App.user;
+  const games = await App.getGames();
+  const featured = games.length > 0 ? games : [
+    {
+      slug: 'dragonraja', title: '龙族：火之晨曦',
+      desc: '在卡塞尔学院的大门背后，隐藏着龙族与混血种千年的战争。你收到了一封来自芝加哥远郊的神秘录取通知书...',
+      tags: ['奇幻', '剧情向', 'TRPG'], players: '1', rating: 4.8,
+      banner: '🐉', author: '内置'
+    }
+  ];
+
+  return `
+  <div class="page-content">
+    <div class="hero">
+      <h1>欢迎来到 <span>UU 模拟器</span></h1>
+      <p>AI驱动的文字冒险游戏平台。每一个选择，都将改变你的命运。</p>
+      ${user ? `<p style="color:var(--text-secondary)">欢迎回来，${user.nick || user.username}</p>`
+             : `<button class="btn btn-primary btn-lg" onclick="showAuth()">立即开始冒险</button>`}
+    </div>
+
+    <div class="lobby-filters">
+      <span class="filter-tag active">全部</span>
+      <span class="filter-tag">奇幻</span>
+      <span class="filter-tag">TRPG</span>
+      <span class="filter-tag">剧情向</span>
+      <span class="filter-tag">高自由度</span>
+    </div>
+
+    <div class="featured-grid">
+      ${games.concat(featured).slice(0, 1).map(g => `
+        <div class="game-card" onclick="startGame('${g.slug}')">
+          <div class="game-card-banner" style="background: linear-gradient(135deg, #1a0a2e, #2a1a1a);">
+            <span style="font-size:64px">${g.banner || '🎮'}</span>
+            <div class="overlay"></div>
+          </div>
+          <div class="game-card-body">
+            <h3>${g.title}</h3>
+            <p>${g.desc}</p>
+          </div>
+          <div class="game-card-meta">
+            <span>${g.tags?.map(t => `<span class="tag">${t}</span>`).join(' ') || ''}</span>
+            <span>⭐ ${g.rating || '?'}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    ${!user ? `
+    <div style="text-align:center;margin-top:48px;padding:32px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)">
+      <h3 style="margin-bottom:12px">登录后即可创建角色、保存进度</h3>
+      <button class="btn btn-primary" onclick="showAuth()">登录 / 注册</button>
+    </div>` : `
+    <div style="text-align:center;margin-top:48px;padding:32px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-color)">
+      <h3 style="margin-bottom:12px">开始你的龙族冒险</h3>
+      <p style="color:var(--text-secondary);margin-bottom:16px">创建属于你的混血种角色，踏入卡塞尔学院的大门</p>
+      <button class="btn btn-primary btn-lg" onclick="startGame('dragonraja')">🐉 进入龙族世界</button>
+    </div>`}
+  </div>`;
+});
+
+Router.register('lobby', async () => {
+  const games = await App.getGames();
+  const builtin = [
+    { slug: 'dragonraja', title: '龙族：火之晨曦', desc: '卡塞尔学院，混血种与龙族的千年战争。你收到了一封神秘的录取通知书...', tags: ['奇幻', 'TRPG', '剧情向'], banner: '🐉', rating: 4.8 }
+  ];
+  const all = games.length > 0 ? games : builtin;
+
+  return `
+  <div class="page-content">
+    <div class="page-header">
+      <h1>🎮 游戏大厅</h1>
+      <p>选择一个世界，开启你的冒险</p>
+    </div>
+    <div class="lobby-filters">
+      <span class="filter-tag active">全部</span>
+      <span class="filter-tag">奇幻</span>
+      <span class="filter-tag">TRPG</span>
+    </div>
+    <div class="featured-grid">
+      ${all.map(g => `
+        <div class="game-card" onclick="startGame('${g.slug}')">
+          <div class="game-card-banner" style="background: linear-gradient(135deg, #1a0a2e, #2a1a1a);">
+            <span style="font-size:64px">${g.banner || '🎮'}</span>
+            <div class="overlay"></div>
+          </div>
+          <div class="game-card-body">
+            <h3>${g.title}</h3>
+            <p>${g.desc}</p>
+          </div>
+          <div class="game-card-meta">
+            <span>${g.tags?.map(t => `<span class="tag">${t}</span>`).join(' ') || ''}</span>
+            <span>⭐ ${g.rating || '?'}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+});
+
+// 开始游戏
+function startGame(slug) {
+  if (!App.user) {
+    showAuth();
+    return;
+  }
+  Router.go('character', { game: slug });
+}
+</script>
+<script>/* ========================================
+   UU模拟器 - 角色创建器
+   ======================================== */
+
+let charCreator = {
+  game: null,
+  step: 0,
+  data: {},
+  template: null,
+  maxSteps: 5
+};
+
+Router.register('character', async (params) => {
+  const gameSlug = params.game || 'dragonraja';
+  const template = getGameTemplate(gameSlug);
+  if (!template) return '<div class="page-content"><h1>游戏模板未找到</h1></div>';
+
+  charCreator = {
+    game: gameSlug,
+    step: 0,
+    data: { name: '', gender: '男', age: 18 },
+    template,
+    maxSteps: template.createSteps || 5
+  };
+
+  return renderCreatorStep();
+});
+
+function renderCreatorStep() {
+  const c = charCreator;
+  const t = c.template;
+  const step = c.step;
+
+  const steps = ['基本信息', '血统背景', '属性分配', '言灵选择', '确认创建'];
+  const stepNames = t.stepNames || steps;
+
+  return `
+  <div class="page-content">
+    <div class="page-header">
+      <h1>🐉 创建你的角色</h1>
+      <p>${t.title} — 塑造属于你的混血种</p>
+    </div>
+
+    <div class="creation-steps">
+      ${stepNames.map((s, i) => `
+        <span class="step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}">${s}</span>
+      `).join('')}
+    </div>
+
+    <div class="creation-panel">
+      <div class="creation-form">
+        ${renderStepContent(step, t, c.data)}
+      </div>
+      <div class="creation-preview">
+        ${renderPreview(c.data, t)}
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:24px;max-width:600px;margin-left:auto;margin-right:auto">
+      <button class="btn btn-secondary" onclick="prevStep()" ${step === 0 ? 'disabled' : ''}>上一步</button>
+      <button class="btn btn-primary" onclick="nextStep()">${step >= c.maxSteps - 1 ? '✨ 创建角色' : '下一步'}</button>
+    </div>
+  </div>`;
+}
+
+function renderStepContent(step, t, data) {
+  switch(step) {
+    case 0: return renderBasicInfo(t, data);
+    case 1: return renderBloodline(t, data);
+    case 2: return renderAttributes(t, data);
+    case 3: return renderSpirit(t, data);
+    case 4: return renderConfirm(t, data);
+    default: return '';
+  }
+}
+
+function renderBasicInfo(t, data) {
+  return `
+    <h3 style="margin-bottom:16px">📋 基本信息</h3>
+    <div class="form-group">
+      <label>角色姓名</label>
+      <input type="text" id="c-name" value="${data.name || ''}" placeholder="输入你的名字" oninput="updateCharData('name', this.value)">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>性别</label>
+        <select id="c-gender" onchange="updateCharData('gender', this.value)">
+          ${['男', '女', '其他'].map(g => `<option value="${g}" ${data.gender === g ? 'selected' : ''}>${g}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>年龄</label>
+        <input type="number" id="c-age" value="${data.age || 18}" min="16" max="60" oninput="updateCharData('age', parseInt(this.value) || 18)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>外貌特征</label>
+      <textarea id="c-appearance" placeholder="描述你的角色外貌..." oninput="updateCharData('appearance', this.value)">${data.appearance || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>性格简述</label>
+      <textarea id="c-personality" placeholder="冷静、冲动、谨慎、热血..." oninput="updateCharData('personality', this.value)">${data.personality || ''}</textarea>
+    </div>
+  `;
+}
+
+function renderBloodline(t, data) {
+  const bloodlines = t.bloodlines || [
+    { id: 'bai_de', name: '白王血裔', desc: '白王的后裔，拥有极高的精神属性潜力和强大的言灵天赋', icon: '🤍' },
+    { id: 'hei_de', name: '黑王血裔', desc: '黑王的后裔，肉体力量和龙血纯度潜力极高，战斗天赋异禀', icon: '🖤' },
+    { id: 'hun_xue', name: '普通混血种', desc: '最常见的混血种，各方面均衡发展，适应性最强', icon: '💜' },
+    { id: 'mi_dang', name: '秘党世家', desc: '出身秘党核心家族，从小接受屠龙训练，拥有丰富的知识和人脉', icon: '⚜️' }
+  ];
+
+  const backgrounds = t.backgrounds || [
+    { id: 'student', name: '普通学生', desc: '在收到卡塞尔通知书前，过着平凡的生活' },
+    { id: 'fighter', name: '武术世家', desc: '自幼习武，身体素质远超常人' },
+    { id: 'scholar', name: '学术天才', desc: '在历史/语言学方面有惊人的天赋' },
+    { id: 'loner', name: '独行者', desc: '在街头长大，靠自己的本能活到现在' }
+  ];
+
+  return `
+    <h3 style="margin-bottom:16px">🧬 血统与背景</h3>
+    <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:8px">选择血统</label>
+    <div class="option-grid">
+      ${bloodlines.map(b => `
+        <div class="option-card ${data.bloodline === b.id ? 'selected' : ''}" onclick="selectCharOption('bloodline', '${b.id}')">
+          ${b.icon} ${b.name}
+          <div class="opt-desc">${b.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:16px">
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:8px">出身背景</label>
+      <div class="option-grid">
+        ${backgrounds.map(b => `
+          <div class="option-card ${data.background === b.id ? 'selected' : ''}" onclick="selectCharOption('background', '${b.id}')">
+            ${b.name}
+            <div class="opt-desc">${b.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderAttributes(t, data) {
+  const baseAttrs = t.attributes || [
+    { id: 'str', name: '力量', desc: '物理攻击力与体能', icon: '💪' },
+    { id: 'agi', name: '敏捷', desc: '速度与反应', icon: '⚡' },
+    { id: 'con', name: '体质', desc: '生命值与抗性', icon: '🛡️' },
+    { id: 'int', name: '智力', desc: '知识与推理', icon: '🧠' },
+    { id: 'cha', name: '魅力', desc: '社交与领导力', icon: '💎' },
+    { id: 'blood', name: '血统纯度', desc: '龙血浓度，影响言灵威力', icon: '🔴' }
+  ];
+  const pts = data.attrPoints || 18;
+  const attrs = data.attributes || {};
+
+  return `
+    <h3 style="margin-bottom:16px">⚔️ 属性分配（剩余：<span style="color:var(--accent-gold)" id="attr-pts">${pts}</span> 点）</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">龙族混血种的基础属性，每个属性至少1点，上限10点</p>
+    ${baseAttrs.map(a => {
+      const val = attrs[a.id] || 1;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <span style="width:24px;font-size:18px">${a.icon}</span>
+          <span style="width:50px;font-size:13px;color:var(--text-secondary)">${a.name}</span>
+          <button class="btn btn-sm btn-ghost" onclick="adjustAttr('${a.id}', -1)">−</button>
+          <span style="width:24px;text-align:center;font-weight:700;color:var(--accent-gold)" id="attr-${a.id}">${val}</span>
+          <button class="btn btn-sm btn-ghost" onclick="adjustAttr('${a.id}', 1)">+</button>
+          <span style="font-size:12px;color:var(--text-muted)">${a.desc}</span>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function renderSpirit(t, data) {
+  const spirits = t.spiritWords || [
+    { id: 'sword', name: '剑御·天羽羽斩', type: '攻击型', desc: '召唤无数利刃攻击敌人，血统纯度越高，剑阵越强', icon: '🗡️' },
+    { id: 'flame', name: '炽·君焰', type: '攻击型', desc: '操控火焰的力量，可释放高温烈焰焚烧一切', icon: '🔥' },
+    { id: 'time', name: '时隙·时间零', type: '辅助型', desc: '感知和时间流速的变化，让自己进入超加速状态', icon: '⏳' },
+    { id: 'thunder', name: '雷·雷池', type: '攻击型', desc: '召唤雷电之力，可攻可守，速度极快', icon: '⚡' },
+    { id: 'soul', name: '圣言·审判', type: '精神型', desc: '精神攻击，直接作用于目标的灵魂，无视物理防御', icon: '👁️' },
+    { id: 'shield', name: '盾·无尘之地', type: '防御型', desc: '在周身形成绝对防御领域，阻挡一切攻击', icon: '🔮' }
+  ];
+
+  return `
+    <h3 style="margin-bottom:16px">🔮 言灵选择</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">言灵是混血种与生俱来的能力，选择你的初始言灵</p>
+    <div class="option-grid" style="grid-template-columns:1fr 1fr">
+      ${spirits.map(s => `
+        <div class="option-card ${data.spirit === s.id ? 'selected' : ''}" onclick="selectCharOption('spirit', '${s.id}')" style="text-align:left;padding:14px">
+          <div style="font-weight:600">${s.icon} ${s.name}</div>
+          <div class="opt-desc" style="margin-top:4px">${s.desc}</div>
+          <span style="display:inline-block;margin-top:6px;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(212,168,67,0.15);color:var(--accent-gold)">${s.type}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderConfirm(t, data) {
+  const bloodlineMap = { bai_de: '白王血裔', hei_de: '黑王血裔', hun_xue: '普通混血种', mi_dang: '秘党世家' };
+  const bgMap = { student: '普通学生', fighter: '武术世家', scholar: '学术天才', loner: '独行者' };
+  const spiritMap = {
+    sword: '剑御·天羽羽斩', flame: '炽·君焰', time: '时隙·时间零',
+    thunder: '雷·雷池', soul: '圣言·审判', shield: '盾·无尘之地'
+  };
+
+  return `
+    <h3 style="margin-bottom:16px">✨ 确认角色信息</h3>
+    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:24px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div class="avatar-placeholder" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#2a1a3e,#1a2a3e);border:2px solid var(--border-glow);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 8px">${data.gender === '女' ? '👩' : '👨'}</div>
+        <h2 style="font-size:22px">${data.name || '未命名'}</h2>
+        <p style="color:var(--text-secondary);font-size:13px">${data.gender} · ${data.age}岁</p>
+      </div>
+      <div class="stat-list">
+        <div class="stat-row"><span class="stat-name">血统</span><span class="stat-val">${bloodlineMap[data.bloodline] || '未选择'}</span></div>
+        <div class="stat-row"><span class="stat-name">出身</span><span class="stat-val">${bgMap[data.background] || '未选择'}</span></div>
+        <div class="stat-row"><span class="stat-name">言灵</span><span class="stat-val">${spiritMap[data.spirit] || '未选择'}</span></div>
+        ${Object.entries(data.attributes || {}).map(([k, v]) => {
+          const attrNames = { str: '力量', agi: '敏捷', con: '体质', int: '智力', cha: '魅力', blood: '血统纯度' };
+          return `<div class="stat-row"><span class="stat-name">${attrNames[k] || k}</span><span class="stat-val">${v}</span></div>`;
+        }).join('')}
+        ${data.personality ? `<div class="stat-row"><span class="stat-name">性格</span><span class="stat-val">${data.personality}</span></div>` : ''}
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:16px">确认无误后点击「创建角色」开始冒险</p>
+  `;
+}
+
+function renderPreview(data, t) {
+  const bloodlineMap = { bai_de: '白王血裔', hei_de: '黑王血裔', hun_xue: '普通混血种', mi_dang: '秘党世家' };
+  const spiritMap = {
+    sword: '剑御·天羽羽斩', flame: '炽·君焰', time: '时隙·时间零',
+    thunder: '雷·雷池', soul: '圣言·审判', shield: '盾·无尘之地'
+  };
+
+  return `
+    <div class="avatar-placeholder" style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#2a1a3e,#1a2a3e);border:3px solid var(--border-glow);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 16px">${data.gender === '女' ? '👩' : data.name ? '🧑' : '❓'}</div>
+    <h3 style="font-size:20px">${data.name || '等待命名...'}</h3>
+    <p style="color:var(--text-secondary);font-size:13px">${data.gender || ''} ${data.age ? `· ${data.age}岁` : ''}</p>
+    <div class="stat-list" style="margin-top:16px">
+      <div class="stat-row"><span class="stat-name">血统</span><span class="stat-val">${bloodlineMap[data.bloodline] || '待选择'}</span></div>
+      <div class="stat-row"><span class="stat-name">言灵</span><span class="stat-val">${spiritMap[data.spirit] || '待选择'}</span></div>
+      ${Object.entries(data.attributes || {}).map(([k, v]) => {
+        const attrNames = { str: '力量', agi: '敏捷', con: '体质', int: '智力', cha: '魅力', blood: '血统纯度' };
+        return `<div class="stat-row"><span class="stat-name">${attrNames[k] || k}</span><span class="stat-val">${v}</span></div>`;
+      }).join('')}
+    </div>
+    ${data.bloodline ? `<div style="margin-top:12px;padding:8px;background:rgba(212,168,67,0.1);border-radius:var(--radius-sm);font-size:12px;color:var(--accent-gold)">${t.description?.slice(0, 100) || '龙族混血种，准备进入卡塞尔学院'}</div>` : ''}
+  `;
+}
+
+// 全局函数
+window.updateCharData = function(key, val) {
+  charCreator.data[key] = val;
+};
+
+window.selectCharOption = function(key, val) {
+  charCreator.data[key] = val;
+  renderCharPreview();
+};
+
+window.adjustAttr = function(attrId, delta) {
+  const data = charCreator.data;
+  if (!data.attributes) data.attributes = {};
+  if (!data.attrPoints && data.attrPoints !== 0) data.attrPoints = 18;
+  const current = data.attributes[attrId] || 1;
+  const newVal = current + delta;
+  if (newVal < 1 || newVal > 10) return;
+  if (delta > 0 && data.attrPoints <= 0) return;
+  if (delta < 0 && current <= 1) return;
+  data.attributes[attrId] = newVal;
+  data.attrPoints += delta < 0 ? 1 : -1;
+  renderCharPreview();
+};
+
+window.prevStep = function() {
+  if (charCreator.step > 0) {
+    charCreator.step--;
+    refreshCreator();
+  }
+};
+
+window.nextStep = function() {
+  const step = charCreator.step;
+  const data = charCreator.data;
+
+  if (step === 0 && !data.name) { alert('请填写角色姓名'); return; }
+  if (step === 1 && !data.bloodline) { alert('请选择血统'); return; }
+  if (step === 2) {
+    if (!data.attributes) data.attributes = {};
+    const attrIds = ['str', 'agi', 'con', 'int', 'cha', 'blood'];
+    attrIds.forEach(id => { if (!data.attributes[id]) data.attributes[id] = 1; });
+    if (!data.attrPoints) data.attrPoints = 18;
+  }
+  if (step === 3 && !data.spirit) { alert('请选择言灵'); return; }
+
+  if (step >= charCreator.maxSteps - 1) {
+    finishCharacter();
+    return;
+  }
+  charCreator.step++;
+  refreshCreator();
+};
+
+function refreshCreator() {
+  const main = document.getElementById('main-content');
+  const page = document.getElementById('page-character');
+  if (page) page.innerHTML = renderCreatorStep();
+}
+
+function renderCharPreview() {
+  const main = document.getElementById('main-content');
+  // Simple re-render of preview panel
+  const preview = document.querySelector('.creation-preview');
+  if (preview) {
+    preview.innerHTML = renderPreview(charCreator.data, charCreator.template);
+  }
+  // Update attribute display
+  if (charCreator.data.attributes) {
+    Object.entries(charCreator.data.attributes).forEach(([k, v]) => {
+      const el = document.getElementById(`attr-${k}`);
+      if (el) el.textContent = v;
+    });
+  }
+  const ptsEl = document.getElementById('attr-pts');
+  if (ptsEl) ptsEl.textContent = charCreator.data.attrPoints || 0;
+}
+
+async function finishCharacter() {
+  const data = charCreator.data;
+  if (!data.attributes) {
+    data.attributes = {};
+    ['str','agi','con','int','cha','blood'].forEach(a => data.attributes[a] = data.attributes[a] || 1);
+  }
+  const char = {
+    ...data,
+    game: charCreator.game,
+    createdAt: Date.now(),
+    level: 1,
+    exp: 0,
+    hp: 50 + (data.attributes?.con || 1) * 5,
+    maxHp: 50 + (data.attributes?.con || 1) * 5,
+    location: '开局',
+    inventory: [],
+    flags: [],
+    relationships: {},
+    storyLog: []
+  };
+
+  await App.saveCharacter(char);
+  App.currentChar = char;
+  enterGame(char);
+}
+
+function enterGame(char) {
+  Router.go('game', { charId: char.id || 'new' });
+}
+
+function getGameTemplate(slug) {
+  const templates = {
+    dragonraja: typeof DRAGONRAJA !== 'undefined' ? DRAGONRAJA.template : null
+  };
+  return templates[slug];
+}
+</script>
+<script>/* ========================================
+   UU模拟器 - 游戏引擎
+   叙事引擎 + TRPG战斗系统 + 状态管理
+   ======================================== */
+
+const GameEngine = {
+  char: null,
+  template: null,
+  state: null,
+  currentSaveId: null,
+  autoSaveTimer: null,
+
+  async init(char, template) {
+    this.char = char;
+    this.template = template;
+    this.state = {
+      location: char.location || template.startLocation || 'start',
+      chapter: 1,
+      scene: 'intro',
+      hp: char.hp || 50,
+      maxHp: char.maxHp || 50,
+      sp: 10,
+      maxSp: 10,
+      inventory: char.inventory || [],
+      flags: char.flags || [],
+      relationships: char.relationships || {},
+      storyLog: char.storyLog || [],
+      combat: null,
+      choices: [],
+      narrative: '',
+      turn: 0
+    };
+    // Start auto-save
+    this._startAutoSave();
+    return this;
+  },
+
+  _startAutoSave() {
+    if (this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+    this.autoSaveTimer = setInterval(() => {
+      if (this.char) this.autoSave();
+    }, 60000); // Auto save every 60 seconds
+  },
+
+  // ==========================================
+  // 叙事引擎
+  // ==========================================
+
+  async startScene(sceneId) {
+    const template = this.template;
+    const scene = template.scenes?.[sceneId] || template.scenes?.['start'];
+    if (!scene) {
+      return this._generateAIScene(sceneId);
+    }
+
+    this.state.location = scene.location || this.state.location;
+    this.state.scene = sceneId;
+
+    let narrative = this._renderText(scene.narrative || '');
+    
+    // Check for combat
+    if (scene.combat) {
+      this.startCombat(scene.combat);
+    }
+
+    // Build choices
+    let choices = [];
+    if (scene.choices) {
+      choices = scene.choices
+        .filter(c => this._checkConditions(c.conditions))
+        .map(c => ({
+          id: c.id || Math.random().toString(36).slice(2, 8),
+          text: this._renderText(c.text),
+          hint: c.hint ? this._renderText(c.hint) : '',
+          next: c.next,
+          effects: c.effects || {},
+          combat: c.combat || null,
+          check: c.check || null
+        }));
+    }
+
+    // Apply automatic effects
+    this._applyEffects(scene.effects);
+
+    this.state.narrative = narrative;
+    this.state.choices = choices;
+    this.state.turn++;
+    this.state.storyLog.push({ turn: this.state.turn, scene: sceneId, narrative: narrative.slice(0, 100) });
+
+    return { narrative, choices, state: this._getState() };
+  },
+
+  async makeChoice(choiceId) {
+    const choice = this.state.choices.find(c => c.id === choiceId);
+    if (!choice) throw new Error('无效的选择');
+
+    // Apply effects
+    this._applyEffects(choice.effects);
+
+    // Skill check
+    if (choice.check) {
+      const result = this._skillCheck(choice.check);
+      this.state.narrative += `\n\n[检定: ${choice.check.attr}] 掷出 ${result.roll} + ${result.modifier} = ${result.total}，目标值 ${result.dc} — ${result.success ? '✅ 成功' : '❌ 失败'}`;
+      if (choice.check.failNext && !result.success) {
+        return this.startScene(choice.check.failNext);
+      }
+    }
+
+    // Start combat
+    if (choice.combat) {
+      this.startCombat(choice.combat);
+      return this._renderState();
+    }
+
+    // Go to next scene
+    if (choice.next) {
+      return this.startScene(choice.next);
+    }
+
+    // Fallback: generate AI scene
+    return this._generateAIScene(`after_${choiceId}`);
+  },
+
+  // ==========================================
+  // TRPG战斗系统 (D20)
+  // ==========================================
+
+  startCombat(combatConfig) {
+    const enemies = combatConfig.enemies || [];
+    this.state.combat = {
+      active: true,
+      turn: 0,
+      round: 1,
+      enemies: enemies.map(e => ({
+        ...e,
+        currentHp: e.hp || 20,
+        maxHp: e.hp || 20,
+        status: 'alive'
+      })),
+      log: ['⚔️ 战斗开始！'],
+      playerAction: null,
+      enemyTarget: null,
+      isPlayerTurn: true
+    };
+  },
+
+  performAction(action, targetId) {
+    if (!this.state.combat) return null;
+    const combat = this.state.combat;
+    const char = this.char;
+    const attrs = char.attributes || {};
+    let result = { log: [], effects: {} };
+
+    // Roll initiative
+    if (combat.turn === 0) {
+      const ini = this._d20() + Math.floor((attrs.agi || 1) / 2);
+      const eIni = this._d20() + 5;
+      combat.isPlayerTurn = ini >= eIni;
+      combat.log.push(`🎲 先攻检定: 你(${ini}) vs 敌人(${eIni}) — ${combat.isPlayerTurn ? '你先手' : '敌人先手'}`);
+      combat.turn = 1;
+      if (!combat.isPlayerTurn) return this._enemyTurn();
+    }
+
+    switch(action) {
+      case 'attack': {
+        const enemy = combat.enemies.find(e => e.id === targetId && e.status === 'alive');
+        if (!enemy) return null;
+        const roll = this._d20();
+        const mod = Math.floor((attrs.str || 1) / 2);
+        const total = roll + mod;
+        const ac = enemy.ac || 10;
+        const hit = total >= ac;
+        
+        let dmg = 0;
+        let log = `🎯 攻击 ${enemy.name}: 掷出 ${roll} + ${mod} = ${total} vs AC ${ac} — ${hit ? '命中！' : '未命中'}`;
+        
+        if (hit) {
+          dmg = this._d20(6) + Math.floor((attrs.str || 1) / 3);
+          if (roll === 20) { dmg *= 2; log += ' 💥 暴击！'; }
+          enemy.currentHp = Math.max(0, enemy.currentHp - dmg);
+          log += ` 造成 ${dmg} 点伤害`;
+          if (enemy.currentHp <= 0) {
+            enemy.status = 'dead';
+            log += ` 💀 ${enemy.name} 被击败！`;
+          }
+        }
+        combat.log.push(log);
+        result.log.push(log);
+        break;
+      }
+      case 'spirit': {
+        // Use spirit word (言灵)
+        const spCost = 3;
+        if (this.state.sp < spCost) {
+          combat.log.push('❌ 灵力不足，无法使用言灵');
+          return null;
+        }
+        this.state.sp -= spCost;
+        const enemy = combat.enemies.find(e => e.id === targetId && e.status === 'alive');
+        if (!enemy) return null;
+        const roll = this._d20();
+        const mod = Math.floor((attrs.int || 1) / 2) + Math.floor((attrs.blood || 1) / 2);
+        const total = roll + mod;
+        const dc = 8 + (enemy.mdef || 5);
+        const hit = total >= dc;
+        
+        let dmg = 0;
+        let log = `🔮 言灵释放: 掷出 ${roll} + ${mod} = ${total} vs DC ${dc} — ${hit ? '成功' : '失败'}`;
+        
+        if (hit) {
+          dmg = this._d20(8) + Math.floor((attrs.blood || 1) / 2);
+          if (roll >= 18) { dmg = Math.floor(dmg * 1.5); log += ' ✨ 言灵共鸣！'; }
+          enemy.currentHp = Math.max(0, enemy.currentHp - dmg);
+          log += ` 造成 ${dmg} 点精神伤害`;
+          if (enemy.currentHp <= 0) {
+            enemy.status = 'dead';
+            log += ` 💀 ${enemy.name} 被击败！`;
+          }
+        }
+        combat.log.push(log);
+        result.log.push(log);
+        break;
+      }
+      case 'defend': {
+        const heal = this._d20(4) + Math.floor((attrs.con || 1) / 3);
+        this.state.hp = Math.min(this.state.maxHp, this.state.hp + heal);
+        combat.log.push(`🛡️ 防御姿态: 恢复 ${heal} HP (当前 ${this.state.hp}/${this.state.maxHp})`);
+        result.log.push(`防御恢复 ${heal} HP`);
+        break;
+      }
+      case 'flee': {
+        const roll = this._d20();
+        const mod = Math.floor((attrs.agi || 1) / 2);
+        const success = roll + mod > 12;
+        combat.log.push(`🏃 试图逃跑: 掷出 ${roll} + ${mod} = ${roll + mod} — ${success ? '成功逃脱' : '逃跑失败'}`);
+        if (success) {
+          combat.active = false;
+          combat.log.push('✅ 你成功脱离了战斗');
+          return { type: 'flee_success', log: ['成功逃离战斗'] };
+        }
+        return null;
+      }
+    }
+
+    // Check if all enemies dead
+    const alive = combat.enemies.filter(e => e.status === 'alive');
+    if (alive.length === 0) {
+      combat.active = false;
+      combat.log.push('🏆 战斗胜利！');
+      result.log.push('🏆 战斗胜利！');
+      // Reward
+      const exp = combat.enemies.reduce((sum, e) => sum + (e.expReward || 10), 0);
+      this.char.exp = (this.char.exp || 0) + exp;
+      result.effects.expGain = exp;
+      this.state.combat = null;
+      return { type: 'victory', ...result };
+    }
+
+    // Enemy turn
+    return this._enemyTurn();
+  },
+
+  _enemyTurn() {
+    const combat = this.state.combat;
+    if (!combat || !combat.active) return null;
+
+    const alive = combat.enemies.filter(e => e.status === 'alive');
+    const result = { log: [], effects: {} };
+
+    alive.forEach(enemy => {
+      const roll = this._d20();
+      const atk = enemy.atk || 5;
+      const total = roll + atk;
+      const ac = 10 + Math.floor((this.char.attributes?.agi || 1) / 2);
+      const hit = total >= ac;
+      
+      let log = `👹 ${enemy.name} 攻击: 掷出 ${roll} + ${atk} = ${total} vs AC ${ac} — ${hit ? '命中！' : '未命中'}`;
+      
+      if (hit) {
+        const dmg = this._d20(6) + Math.floor(atk / 2);
+        this.state.hp = Math.max(0, this.state.hp - dmg);
+        log += ` 受到 ${dmg} 点伤害 (剩余 ${this.state.hp}/${this.state.maxHp})`;
+        
+        if (this.state.hp <= 0) {
+          log += ' 💀 你被击倒了...';
+          this.state.combat.active = false;
+          this.state.combat = null;
+          result.log.push(log);
+          return { type: 'defeat', log: result.log };
+        }
+      }
+      combat.log.push(log);
+      result.log.push(log);
+    });
+
+    combat.round++;
+    combat.isPlayerTurn = true;
+    return { type: 'enemy_turn_end', ...result };
+  },
+
+  // ==========================================
+  // 工具函数
+  // ==========================================
+
+  _d20(sides = 20) {
+    return Math.floor(Math.random() * sides) + 1;
+  },
+
+  _skillCheck(check) {
+    const attr = check.attr || 'str';
+    const dc = check.dc || 10;
+    const roll = this._d20();
+    const modifier = Math.floor((this.char.attributes?.[attr] || 1) / 2);
+    const total = roll + modifier;
+    return { roll, modifier, total, dc, success: total >= dc };
+  },
+
+  _checkConditions(conditions) {
+    if (!conditions) return true;
+    const flags = this.state.flags;
+    const rels = this.state.relationships;
+    
+    if (conditions.flag) return flags.includes(conditions.flag);
+    if (conditions.noFlag) return !flags.includes(conditions.noFlag);
+    if (conditions.attr) {
+      const [attr, op, val] = conditions.attr.split(/\s+/);
+      const actual = this.char.attributes?.[attr] || 1;
+      if (op === '>=') return actual >= parseInt(val);
+      if (op === '<=') return actual <= parseInt(val);
+      if (op === '>') return actual > parseInt(val);
+      if (op === '<') return actual < parseInt(val);
+      if (op === '==') return actual === parseInt(val);
+    }
+    if (conditions.affection) {
+      const [npc, op, val] = conditions.affection.split(/\s+/);
+      const actual = rels[npc] || 0;
+      if (op === '>=') return actual >= parseInt(val);
+      if (op === '>') return actual > parseInt(val);
+    }
+    if (conditions.item) return this.state.inventory.includes(conditions.item);
+    if (conditions.noItem) return !this.state.inventory.includes(conditions.noItem);
+    return true;
+  },
+
+  _applyEffects(effects) {
+    if (!effects) return;
+    if (effects.flag) this.state.flags.push(effects.flag);
+    if (effects.removeFlag) {
+      this.state.flags = this.state.flags.filter(f => f !== effects.removeFlag);
+    }
+    if (effects.item) {
+      if (!this.state.inventory.includes(effects.item)) this.state.inventory.push(effects.item);
+    }
+    if (effects.removeItem) {
+      this.state.inventory = this.state.inventory.filter(i => i !== effects.removeItem);
+    }
+    if (effects.hp) {
+      this.state.hp = Math.max(0, Math.min(this.state.maxHp, this.state.hp + effects.hp));
+    }
+    if (effects.sp) {
+      this.state.sp = Math.max(0, Math.min(this.state.maxSp, this.state.sp + effects.sp));
+    }
+    if (effects.exp) {
+      this.char.exp = (this.char.exp || 0) + effects.exp;
+    }
+    if (effects.affection) {
+      Object.entries(effects.affection).forEach(([npc, val]) => {
+        this.state.relationships[npc] = (this.state.relationships[npc] || 0) + val;
+      });
+    }
+    if (effects.setAffection) {
+      Object.entries(effects.setAffection).forEach(([npc, val]) => {
+        this.state.relationships[npc] = val;
+      });
+    }
+    if (effects.location) {
+      this.state.location = effects.location;
+    }
+    if (effects.chapter) {
+      this.state.chapter = effects.chapter;
+    }
+  },
+
+  _renderText(text) {
+    if (!text) return '';
+    return text
+      .replace(/{name}/g, this.char?.name || '你')
+      .replace(/{gender}/g, this.char?.gender === '女' ? '她' : '他')
+      .replace(/{self}/g, this.char?.gender === '女' ? '你' : '你')
+      .replace(/{bloodline}/g, this.char?.bloodline || '混血种')
+      .replace(/{spirit}/g, this._getSpiritName())
+      .replace(/{location}/g, this.state?.location || '未知');
+  },
+
+  _getSpiritName() {
+    const names = {
+      sword: '天羽羽斩', flame: '君焰', time: '时间零',
+      thunder: '雷池', soul: '审判', shield: '无尘之地'
+    };
+    return names[this.char?.spirit] || '未知言灵';
+  },
+
+  _getState() {
+    return {
+      hp: this.state.hp,
+      maxHp: this.state.maxHp,
+      sp: this.state.sp,
+      maxSp: this.state.maxSp,
+      location: this.state.location,
+      chapter: this.state.chapter,
+      scene: this.state.scene,
+      turn: this.state.turn,
+      inventory: [...this.state.inventory],
+      flags: [...this.state.flags],
+      relationships: { ...this.state.relationships },
+      attribtues: { ...(this.char.attributes || {}) },
+      exp: this.char.exp || 0,
+      level: this.char.level || 1,
+      combat: this.state.combat ? { ...this.state.combat, log: [...this.state.combat.log] } : null
+    };
+  },
+
+  _generateAIScene(sceneId) {
+    // Placeholder for AI-generated scenes
+    // When AI generation is triggered, this returns a format that the user imports
+    return {
+      type: 'ai_needed',
+      sceneId: sceneId,
+      context: {
+        location: this.state.location,
+        flags: this.state.flags,
+        relationships: this.state.relationships,
+        char: { name: this.char.name, attributes: this.char.attributes, bloodline: this.char.bloodline }
+      },
+      narrative: '[AI生成区域] 这段剧情需要我（AI）来生成。请告诉我你当前的选择，我来写接下来的故事。',
+      choices: [
+        { id: 'ai_wait', text: '等待AI生成剧情...', hint: '在聊天中告诉我你的行动', next: null }
+      ]
+    };
+  },
+
+  // ==========================================
+  // 存档系统
+  // ==========================================
+
+  async save(slotName) {
+    const saveData = {
+      id: this.currentSaveId || `save_${Date.now()}`,
+      charId: this.char.id,
+      slotName: slotName || `存档 ${formatDate(Date.now())}`,
+      char: { ...this.char },
+      state: { ...this.state, storyLog: this.state.storyLog.slice(-50) },
+      savedAt: Date.now(),
+      chapter: this.state.chapter,
+      location: this.state.location,
+      turn: this.state.turn
+    };
+    if (!this.currentSaveId) {
+      this.currentSaveId = saveData.id;
+    }
+    await App.saveGame(saveData);
+    return saveData;
+  },
+
+  async autoSave() {
+    if (!this.char) return;
+    const saves = await App.getSaves(this.char.id);
+    const autoSaves = saves.filter(s => s.slotName?.startsWith('[自动]'));
+    // Keep only 5 auto saves
+    if (autoSaves.length >= 5) {
+      const oldest = autoSaves.sort((a, b) => a.savedAt - b.savedAt)[0];
+      await App.deleteSave(oldest.id);
+    }
+    const saveData = {
+      id: `auto_${Date.now()}`,
+      charId: this.char.id,
+      slotName: `[自动] 第${this.state.chapter}章 - ${formatDate(Date.now())}`,
+      char: { ...this.char },
+      state: { ...this.state, storyLog: this.state.storyLog.slice(-30) },
+      savedAt: Date.now(),
+      chapter: this.state.chapter,
+      location: this.state.location
+    };
+    await App.saveGame(saveData);
+  },
+
+  async load(saveId) {
+    const data = await App.loadSave(saveId);
+    if (!data) throw new Error('存档未找到');
+    this.char = data.char;
+    this.state = data.state;
+    this.currentSaveId = data.id;
+    return this._renderState();
+  }
+};
+
+// ==========================================
+// 游戏界面渲染
+// ==========================================
+Router.register('game', async (params) => {
+  const charId = params.charId;
+  const char = App.currentChar;
+  if (!char) return '<div class="page-content"><h1>请先创建角色</h1><button class="btn btn-primary" onclick="navigate(\'lobby\')">返回大厅</button></div>';
+
+  const template = getGameTemplate(char.game);
+  if (!template) return '<div class="page-content"><h1>游戏模板未找到</h1></div>';
+
+  await GameEngine.init(char, template);
+  const result = await GameEngine.startScene('start');
+
+  // Re-save character reference
+  App.currentChar = GameEngine.char;
+
+  return renderGameUI(result);
+});
+
+function renderGameUI(result) {
+  const s = GameEngine._getState();
+  const char = GameEngine.char;
+  const attrs = char.attributes || {};
+
+  return `
+  <div class="game-layout">
+    <!-- 左侧面板：角色信息 -->
+    <div class="game-sidebar">
+      <div class="sidebar-section" style="text-align:center">
+        <div class="char-portrait">${char.gender === '女' ? '👩' : '🧑'}</div>
+        <h3 style="font-size:15px">${char.name}</h3>
+        <p style="font-size:12px;color:var(--text-muted)">Lv.${char.level || 1} · ${char.bloodline || '混血种'}</p>
+      </div>
+      <div class="sidebar-section">
+        <h4>状态</h4>
+        <div class="stat-bar">
+          <span class="label">HP</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${(s.hp/s.maxHp)*100}%;background:var(--accent-red)"></div></div>
+          <span class="value">${s.hp}/${s.maxHp}</span>
+        </div>
+        <div class="stat-bar">
+          <span class="label">SP</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${(s.sp/s.maxSp)*100}%;background:var(--accent-blue)"></div></div>
+          <span class="value">${s.sp}/${s.maxSp}</span>
+        </div>
+        <div class="stat-bar">
+          <span class="label">EXP</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${((char.exp||0) % 100)/100*100}%;background:var(--accent-gold)"></div></div>
+          <span class="value">${char.exp||0}</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h4>属性</h4>
+        ${Object.entries(attrs).map(([k, v]) => {
+          const names = {str:'力量',agi:'敏捷',con:'体质',int:'智力',cha:'魅力',blood:'血统'};
+          return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0">
+            <span style="color:var(--text-secondary)">${names[k]||k}</span>
+            <span style="color:var(--accent-gold)">${v}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="sidebar-section">
+        <h4>背包 (${s.inventory.length})</h4>
+        <div class="inventory-grid">
+          ${Array.from({length:8}).map((_, i) => `
+            <div class="inv-slot ${s.inventory[i] ? 'has-item' : ''}" title="${s.inventory[i] || ''}">
+              ${s.inventory[i] ? '📦' : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h4>好感度</h4>
+        ${Object.keys(s.relationships).length === 0 ? '<div style="font-size:12px;color:var(--text-muted)">暂无</div>' :
+          Object.entries(s.relationships).slice(0, 5).map(([npc, val]) => `
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0">
+              <span style="color:var(--text-secondary)">${npc}</span>
+              <span style="color:${val > 0 ? 'var(--success)' : val < 0 ? 'var(--danger)' : 'var(--text-muted)'}">${val > 0 ? '+' : ''}${val}</span>
+            </div>
+          `).join('')}
+      </div>
+    </div>
+
+    <!-- 中间：叙事主区域 -->
+    <div class="game-main" id="game-main">
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="location-tag" style="padding:4px 12px;border-radius:4px;background:rgba(212,168,67,0.15);color:var(--accent-gold);font-size:12px">📍 ${s.location}</span>
+        <span style="font-size:12px;color:var(--text-muted)">第${s.chapter}章 · 回合 ${s.turn}</span>
+        <span style="flex:1"></span>
+        <button class="btn btn-sm btn-ghost" onclick="showSaveModal()">💾 存档</button>
+        <button class="btn btn-sm btn-ghost" onclick="showLoadModal()">📂 读档</button>
+      </div>
+
+      <div class="narrative-area" id="narrative-area">
+        ${renderNarrative(result)}
+      </div>
+
+      <div class="choices-area" id="choices-area">
+        <h4>你的选择：</h4>
+        ${renderChoices(result)}
+      </div>
+    </div>
+
+    <!-- 右侧面板：地图 & 信息 -->
+    <div class="game-sidebar-right">
+      <div class="sidebar-section">
+        <h4>地图</h4>
+        <div class="map-container">
+          ${renderMap(s.location)}
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h4>章节进度</h4>
+        <div style="font-size:13px;color:var(--text-muted)">
+          ${s.chapter === 1 ? '🌅 火之晨曦' : s.chapter === 2 ? '🌙 悼亡者之瞳' : s.chapter === 3 ? '🌊 黑月之潮' : '🔥 奥丁之渊'}
+        </div>
+        <div class="stat-bar" style="margin-top:8px">
+          <span class="label">进度</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${Math.min(100, (s.turn/50)*100)}%;background:var(--accent-gold)"></div></div>
+          <span class="value">${Math.min(100, Math.floor((s.turn/50)*100))}%</span>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h4>标记</h4>
+        ${s.flags.length === 0 ? '<div style="font-size:12px;color:var(--text-muted)">暂无</div>' :
+          s.flags.map(f => `<div style="font-size:12px;padding:3px 0">🏷️ ${f}</div>`).join('')}
+      </div>
+      <div class="sidebar-section">
+        <button class="btn btn-sm btn-secondary btn-full" onclick="showAIImport()">🤖 AI导入剧情</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderNarrative(result) {
+  if (!result) return '<div class="system-msg">加载中...</div>';
+  
+  let html = '<div class="narrative-text">';
+  
+  // Location tag
+  if (result.narrative) {
+    html += `<span class="location-tag">📍 ${GameEngine.state?.location || ''}</span>\n\n`;
+    
+    // Parse narrative for special tags
+    let text = result.narrative;
+    // Highlight NPC names (Chinese characters followed by : or said patterns)
+    text = text.replace(/(路明非|楚子航|凯撒|诺诺|昂热|芬里厄|夏弥|源稚生|绘梨衣)/g, '<span class="npc-name">$1</span>');
+    // Highlight item names
+    text = text.replace(/《([^》]+)》/g, '<span class="item-name">《$1》</span>');
+    // System messages
+    text = text.replace(/\[系统\]/g, '<span class="system-msg">[系统]</span>');
+    
+    html += text.replace(/\n/g, '<br>');
+  }
+  
+  // Combat state
+  if (GameEngine.state?.combat?.active) {
+    const combat = GameEngine.state.combat;
+    html += `
+    <div class="combat-overlay">
+      <div class="combat-title">⚔️ 战斗中</div>
+      <div class="combat-stats">
+        <div class="combatant">
+          <div class="name">${GameEngine.char.name}</div>
+          <div class="hp-bar"><div class="hp-fill" style="width:${(GameEngine.state.hp/GameEngine.state.maxHp)*100}%"></div></div>
+          <div style="font-size:12px;color:var(--text-muted)">${GameEngine.state.hp}/${GameEngine.state.maxHp} HP</div>
+        </div>
+        ${combat.enemies.filter(e => e.status === 'alive').map(e => `
+          <div class="combatant">
+            <div class="name" style="color:var(--accent-red)">${e.name}</div>
+            <div class="hp-bar"><div class="hp-fill" style="width:${(e.currentHp/e.maxHp)*100}%;background:var(--accent-red)"></div></div>
+            <div style="font-size:12px;color:var(--text-muted)">${e.currentHp}/${e.maxHp} HP</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="combat-log-area">
+        ${combat.log.slice(-5).map(l => `<div class="${l.includes('命中') || l.includes('暴击') ? 'success' : l.includes('未命中') || l.includes('失败') ? 'failure' : ''}">${l}</div>`).join('')}
+      </div>
+      ${combat.isPlayerTurn ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="btn btn-primary btn-sm" onclick="combatAction('attack', '${combat.enemies.filter(e=>e.status==='alive')[0]?.id || ''}')">⚔️ 攻击</button>
+          <button class="btn btn-secondary btn-sm" onclick="combatAction('spirit', '${combat.enemies.filter(e=>e.status==='alive')[0]?.id || ''}')">🔮 言灵</button>
+          <button class="btn btn-secondary btn-sm" onclick="combatAction('defend', '')">🛡️ 防御</button>
+          <button class="btn btn-secondary btn-sm" onclick="combatAction('flee', '')">🏃 逃跑</button>
+        </div>
+      ` : '<p style="text-align:center;color:var(--text-muted)">等待敌人行动...</p>'}
+    </div>`;
+  }
+  
+  html += '</div>';
+  return html;
+}
+
+function renderChoices(result) {
+  if (!result?.choices || result.choices.length === 0) {
+    return '<p style="color:var(--text-muted);font-size:13px">等待AI剧情...</p>';
+  }
+  
+  return result.choices.map(c => `
+    <button class="btn-choice" onclick="selectChoice('${c.id}')">
+      ${c.text}
+      ${c.hint ? `<span class="hint">${c.hint}</span>` : ''}
+    </button>
+  `).join('');
+}
+
+function renderMap(currentLocation) {
+  const locations = GameEngine.template?.locations || {};
+  const locs = Object.values(locations);
+  if (locs.length === 0) return '<div style="font-size:12px;color:var(--text-muted)">暂无地图数据</div>';
+  
+  return locs.map(l => `
+    <div class="map-location ${l.id === currentLocation ? 'current' : ''} ${GameEngine.state.flags.includes(`visited_${l.id}`) ? 'visited' : 'locked'}">
+      ${l.icon || '📍'} ${l.name}
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// 全局交互函数
+// ==========================================
+window.selectChoice = async function(choiceId) {
+  try {
+    const result = await GameEngine.makeChoice(choiceId);
+    // Re-render game UI
+    const main = document.getElementById('game-main');
+    if (main) {
+      // Update narrative
+      const na = document.getElementById('narrative-area');
+      const ca = document.getElementById('choices-area');
+      if (na) na.innerHTML = renderNarrative(result);
+      if (ca) ca.innerHTML = renderChoices(result);
+      // Update sidebar stats
+      updateSidebar();
+    } else {
+      // Full re-render
+      const page = document.getElementById('page-game');
+      if (page) page.innerHTML = renderGameUI(result);
+    }
+  } catch(e) {
+    alert('操作失败: ' + e.message);
+  }
+};
+
+window.combatAction = async function(action, targetId) {
+  try {
+    const result = GameEngine.performAction(action, targetId);
+    const na = document.getElementById('narrative-area');
+    const ca = document.getElementById('choices-area');
+    if (na) na.innerHTML = renderNarrative({ narrative: '', choices: [] });
+    updateSidebar();
+    
+    // Check combat end
+    if (result?.type === 'victory' || result?.type === 'defeat' || result?.type === 'flee_success') {
+      // Return to narrative
+      const nextResult = await GameEngine.startScene(GameEngine.state.scene || 'start');
+      if (na) na.innerHTML = renderNarrative(nextResult);
+      if (ca) ca.innerHTML = renderChoices(nextResult);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+};
+
+function updateSidebar() {
+  // This would update the sidebar stats without full re-render
+  // For simplicity, we just update key elements by ID
+}
+
+window.showSaveModal = async function() {
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '💾 保存游戏';
+  
+  const saves = await App.getSaves(GameEngine.char?.id);
+  body.innerHTML = `
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary btn-full" onclick="doSave('手动存档')">📀 新建存档</button>
+    </div>
+    ${saves.length > 0 ? `
+      <h4 style="margin-bottom:8px;font-size:14px;color:var(--text-secondary)">已有存档</h4>
+      <div class="save-list">
+        ${saves.map(s => `
+          <div class="save-item">
+            <div class="save-info">
+              <div class="save-title">${s.slotName}</div>
+              <div class="save-meta">${formatDate(s.savedAt)} · 第${s.chapter}章 · ${s.location}</div>
+            </div>
+            <div class="save-actions">
+              <button class="btn btn-sm btn-secondary" onclick="doLoad('${s.id}')">读取</button>
+              <button class="btn btn-sm btn-ghost" onclick="doDelete('${s.id}')">删除</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<p style="color:var(--text-muted);font-size:13px">暂无存档</p>'}
+  `;
+  modal.style.display = 'flex';
+};
+
+window.showLoadModal = async function() {
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '📂 读取存档';
+  
+  const saves = await App.getSaves(GameEngine.char?.id);
+  body.innerHTML = saves.length > 0 ? `
+    <div class="save-list">
+      ${saves.map(s => `
+        <div class="save-item" onclick="doLoad('${s.id}')">
+          <div class="save-info">
+            <div class="save-title">${s.slotName}</div>
+            <div class="save-meta">${formatDate(s.savedAt)} · 第${s.chapter}章 · ${s.location}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '<p style="color:var(--text-muted)">暂无存档</p>';
+  modal.style.display = 'flex';
+};
+
+window.doSave = async function(name) {
+  await GameEngine.save(name);
+  alert('✅ 存档成功');
+  closeModalById('save-modal');
+};
+
+window.doLoad = async function(id) {
+  if (!confirm('读取存档将覆盖当前进度，确认？')) return;
+  try {
+    const result = await GameEngine.load(id);
+    const page = document.getElementById('page-game');
+    if (page) page.innerHTML = renderGameUI(result);
+    closeModalById('save-modal');
+    alert('✅ 读取成功');
+  } catch(e) {
+    alert('读取失败: ' + e.message);
+  }
+};
+
+window.doDelete = async function(id) {
+  if (!confirm('确认删除此存档？')) return;
+  await App.deleteSave(id);
+  showSaveModal();
+};
+
+window.showAIImport = function() {
+  // This opens a dialog for importing AI-generated content
+  const state = GameEngine.state;
+  const context = {
+    location: state.location,
+    flags: state.flags,
+    relationships: state.relationships,
+    char: { name: GameEngine.char.name, attrs: GameEngine.char.attributes }
+  };
+  
+  const exportData = `[UU-REQ] 当前状态: 位置=${state.location}, 第${state.chapter}章, 回合${state.turn}
+[UU-REQ] 角色: ${GameEngine.char.name} (${GameEngine.char.bloodline})
+[UU-REQ] 标记: ${state.flags.join(', ') || '无'}
+[UU-REQ] 关系: ${Object.entries(state.relationships).map(([n, v]) => `${n}(${v})`).join(', ') || '无'}
+[UU-REQ] 请继续剧情...`;
+
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '🤖 AI剧情导入';
+  body.innerHTML = `
+    <p style="margin-bottom:12px;color:var(--text-secondary);font-size:13px">将当前状态发送给我（AI），我生成剧情后你把结果粘贴回来。</p>
+    <div class="import-area">
+      <textarea id="ai-export-text" readonly>${exportData}</textarea>
+    </div>
+    <div style="margin-top:12px">
+      <label style="font-size:13px;color:var(--text-secondary)">把我生成的剧情粘贴到这里：</label>
+      <textarea id="ai-import-text" placeholder='粘贴AI剧情数据包...' style="width:100%;min-height:150px;margin-top:8px;padding:12px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-mono);font-size:13px"></textarea>
+    </div>
+    <div class="import-actions">
+      <button class="btn btn-primary btn-sm" onclick="importAIContent()">📥 导入剧情</button>
+      <button class="btn btn-sm btn-secondary" onclick="copyAIExport()">📋 复制状态</button>
+      <button class="btn btn-sm btn-ghost" onclick="closeModalById('save-modal')">取消</button>
+    </div>
+  `;
+  modal.style.display = 'flex';
+};
+
+window.copyAIExport = function() {
+  const ta = document.getElementById('ai-export-text');
+  if (ta) {
+    ta.select();
+    document.execCommand('copy');
+    alert('✅ 已复制当前状态，粘贴到对话中发送给我即可');
+  }
+};
+
+window.importAIContent = function() {
+  const ta = document.getElementById('ai-import-text');
+  if (!ta || !ta.value.trim()) {
+    alert('请先粘贴AI生成的剧情数据包');
+    return;
+  }
+  
+  try {
+    const data = JSON.parse(ta.value.trim());
+    // Apply the AI-generated content
+    if (data.narrative) {
+      GameEngine.state.narrative = data.narrative;
+    }
+    if (data.choices) {
+      GameEngine.state.choices = data.choices;
+    }
+    if (data.effects) {
+      GameEngine._applyEffects(data.effects);
+    }
+    if (data.state) {
+      Object.assign(GameEngine.state, data.state);
+    }
+    
+    const result = {
+      narrative: data.narrative || '剧情已更新',
+      choices: data.choices || []
+    };
+    
+    const na = document.getElementById('narrative-area');
+    const ca = document.getElementById('choices-area');
+    if (na) na.innerHTML = renderNarrative(result);
+    if (ca) ca.innerHTML = renderChoices(result);
+    updateSidebar();
+    closeModalById('save-modal');
+    alert('✅ AI剧情已导入');
+  } catch(e) {
+    alert('格式错误，请确保是有效的JSON数据。错误: ' + e.message);
+  }
+};
+
+function closeGame() {
+  if (!confirm('退出游戏？进度将自动保存。')) return;
+  GameEngine.autoSave();
+  navigate('lobby');
+}
+</script>
+<script>/* ========================================
+   UU模拟器 - 创作工坊 & AI导入工具
+   ======================================== */
+
+Router.register('creator', async () => {
+  if (!App.user) {
+    return `
+    <div class="page-content" style="text-align:center;padding-top:80px">
+      <h1>🔧 创作工坊</h1>
+      <p style="color:var(--text-secondary);margin:16px 0">登录后即可创建和编辑游戏模板</p>
+      <button class="btn btn-primary" onclick="showAuth()">登录</button>
+    </div>`;
+  }
+
+  const games = await App.getGames();
+  return `
+  <div class="page-content">
+    <div class="page-header">
+      <h1>🔧 创作工坊</h1>
+      <p>创建你的游戏模板，或导入AI生成的内容</p>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:24px">
+      <button class="btn btn-primary" onclick="showNewTemplate()">✨ 新建模板</button>
+      <button class="btn btn-secondary" onclick="showImportAI()">🤖 AI导入</button>
+      <button class="btn btn-secondary" onclick="showTemplateGuide()">📖 模板指南</button>
+    </div>
+
+    <h3 style="margin-bottom:12px">已安装的游戏模板</h3>
+    <div class="featured-grid">
+      <div class="game-card">
+        <div class="game-card-banner" style="background:linear-gradient(135deg,#1a0a2e,#2a1a1a)">
+          <span style="font-size:64px">🐉</span>
+          <div class="overlay"></div>
+        </div>
+        <div class="game-card-body">
+          <h3>龙族：火之晨曦</h3>
+          <p style="font-size:12px;color:var(--text-muted)">内置 · 62KB · 场景节点40+</p>
+          <p>卡塞尔学院、混血种、龙王……忠实于江南原著的龙族冒险。</p>
+        </div>
+      </div>
+      ${games.filter(g => g.slug !== 'dragonraja').map(g => `
+        <div class="game-card">
+          <div class="game-card-body">
+            <h3>${g.title}</h3>
+            <p>${g.desc}</p>
+          </div>
+          <div class="game-card-meta">
+            <span>自定义模板</span>
+            <button class="btn btn-sm btn-ghost" onclick="deleteGame('${g.slug}')">删除</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+});
+
+window.showNewTemplate = function() {
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '✨ 新建游戏模板';
+  body.innerHTML = `
+    <form onsubmit="createTemplate(event)">
+      <div class="form-group">
+        <label>模板标识 (slug)</label>
+        <input type="text" id="t-slug" placeholder="my-game" required>
+      </div>
+      <div class="form-group">
+        <label>游戏标题</label>
+        <input type="text" id="t-title" placeholder="我的游戏" required>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea id="t-desc" placeholder="描述你的游戏..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>模板JSON数据</label>
+        <textarea id="t-data" placeholder='{\n  "scenes": {},\n  "locations": {},\n  "npcs": {}\n}' style="min-height:300px;font-family:var(--font-mono);font-size:12px"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">创建模板</button>
+    </form>
+  `;
+  modal.style.display = 'flex';
+};
+
+window.createTemplate = async function(e) {
+  e.preventDefault();
+  const slug = document.getElementById('t-slug').value.trim();
+  const title = document.getElementById('t-title').value.trim();
+  const desc = document.getElementById('t-desc').value.trim();
+  const dataStr = document.getElementById('t-data').value.trim();
+  
+  if (!slug || !title) { alert('请填写必要信息'); return; }
+  
+  let templateData;
+  try {
+    templateData = dataStr ? JSON.parse(dataStr) : {};
+  } catch(e) {
+    alert('JSON格式错误: ' + e.message);
+    return;
+  }
+  
+  const gameData = {
+    slug,
+    title,
+    desc: desc || '自定义游戏模板',
+    tags: ['自定义'],
+    banner: '🎮',
+    rating: 0,
+    author: App.user?.nick || App.user?.username,
+    template: templateData,
+    created: Date.now()
+  };
+  
+  await App.registerGame(gameData);
+  alert('✅ 模板创建成功！');
+  closeModalById('save-modal');
+  navigate('creator');
+};
+
+window.showImportAI = function() {
+  const state = GameEngine?.state;
+  const char = GameEngine?.char;
+  
+  const contextStr = state ? JSON.stringify({
+    location: state.location,
+    chapter: state.chapter,
+    flags: state.flags,
+    relationships: state.relationships,
+    inventory: state.inventory,
+    char: { name: char?.name, attributes: char?.attributes, bloodline: char?.bloodline }
+  }, null, 2) : '{}';
+
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '🤖 AI剧情导入/导出';
+  body.innerHTML = `
+    <p style="margin-bottom:12px;color:var(--text-secondary);font-size:13px">
+      将当前游戏状态导出，发送给我（AI）生成剧情，再把结果粘贴回来。
+    </p>
+    
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px">当前状态（可复制发送给AI）</label>
+      <textarea id="ai-export-data" readonly style="width:100%;min-height:120px;padding:12px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-mono);font-size:12px">${contextStr}</textarea>
+      <button class="btn btn-sm btn-secondary" style="margin-top:6px" onclick="copyAIData()">📋 复制状态</button>
+    </div>
+
+    <div>
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px">粘贴AI生成的剧情JSON</label>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+        格式: {"narrative": "剧情文本", "choices": [{"id":"c1","text":"选项1"}], "effects": {"flag":"xxx", "affection": {"NPC":5}}}
+      </p>
+      <textarea id="ai-import-data" style="width:100%;min-height:200px;padding:12px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-mono);font-size:12px" placeholder='在这里粘贴我生成的JSON数据包...'></textarea>
+    </div>
+    
+    <div class="import-actions" style="margin-top:12px">
+      <button class="btn btn-primary btn-sm" onclick="importAIContent()">📥 导入剧情</button>
+      <button class="btn btn-sm btn-ghost" onclick="closeModalById('save-modal')">取消</button>
+    </div>
+
+    <div style="margin-top:20px;padding:16px;background:var(--bg-card);border-radius:var(--radius-md)">
+      <h4 style="font-size:14px;margin-bottom:8px">📌 使用说明</h4>
+      <ol style="font-size:12px;color:var(--text-secondary);line-height:1.8;padding-left:20px">
+        <li>点击「复制状态」，将当前游戏状态粘贴到对话中发给我</li>
+        <li>告诉我你想做什么，我生成后续剧情+选项+状态变更</li>
+        <li>我把结果以JSON格式发给你，你粘贴到上面的输入框</li>
+        <li>点击「导入剧情」，游戏自动更新</li>
+      </ol>
+    </div>
+  `;
+  modal.style.display = 'flex';
+};
+
+window.copyAIData = function() {
+  const ta = document.getElementById('ai-export-data');
+  if (ta) {
+    ta.select();
+    document.execCommand('copy');
+    alert('✅ 已复制。请在对话中粘贴并发给我，我来生成下一段剧情。');
+  }
+};
+
+window.importAIContent = function() {
+  const ta = document.getElementById('ai-import-data');
+  if (!ta || !ta.value.trim()) {
+    alert('请先粘贴AI生成的剧情JSON数据包');
+    return;
+  }
+  
+  try {
+    const data = JSON.parse(ta.value.trim());
+    
+    if (!GameEngine || !GameEngine.state) {
+      alert('请先开始游戏再导入剧情');
+      return;
+    }
+    
+    // Apply narrative
+    if (data.narrative) {
+      GameEngine.state.narrative = data.narrative;
+    }
+    
+    // Apply choices
+    if (data.choices) {
+      GameEngine.state.choices = data.choices;
+    }
+    
+    // Apply effects
+    if (data.effects) {
+      GameEngine._applyEffects(data.effects);
+    }
+    
+    // Apply state overrides
+    if (data.state) {
+      Object.assign(GameEngine.state, data.state);
+    }
+    
+    // Re-render
+    const result = {
+      narrative: data.narrative || GameEngine.state.narrative || '剧情已更新',
+      choices: data.choices || GameEngine.state.choices || []
+    };
+    
+    const na = document.getElementById('narrative-area');
+    const ca = document.getElementById('choices-area');
+    if (typeof renderNarrative === 'function' && na) na.innerHTML = renderNarrative(result);
+    if (typeof renderChoices === 'function' && ca) ca.innerHTML = renderChoices(result);
+    
+    // Auto-save
+    GameEngine.autoSave();
+    
+    closeModalById('save-modal');
+    alert('✅ AI剧情已成功导入！游戏状态已更新。');
+  } catch(e) {
+    alert('❌ 格式错误：' + e.message + '\n\n请确保粘贴的是有效的JSON格式。');
+  }
+};
+
+window.showTemplateGuide = function() {
+  const modal = document.getElementById('save-modal');
+  const title = document.getElementById('save-modal-title');
+  const body = document.getElementById('save-modal-body');
+  title.textContent = '📖 模板开发指南';
+  body.innerHTML = `
+    <div style="font-size:13px;line-height:1.8;color:var(--text-secondary)">
+      <h4 style="color:var(--text-primary);margin-bottom:8px">模板结构</h4>
+      <pre style="background:var(--bg-input);padding:12px;border-radius:var(--radius-sm);font-size:12px;overflow-x:auto">
+{
+  "template": {
+    "slug": "my-game",
+    "title": "我的游戏",
+    "description": "...",
+    "startLocation": "start",
+    
+    "bloodlines": [{ "id": "xxx", "name": "...", "desc": "..." }],
+    "backgrounds": [{ "id": "xxx", "name": "...", "desc": "..." }],
+    "attributes": [{ "id": "str", "name": "力量", "desc": "..." }],
+    "spiritWords": [{ "id": "xxx", "name": "...", "type": "攻击型", "desc": "..." }],
+    
+    "locations": {
+      "start": { "id": "start", "name": "起点", "icon": "📍", "desc": "..." }
+    },
+    
+    "npcs": {
+      "npc1": { "id": "npc1", "name": "...", "title": "...", "desc": "..." }
+    }
+  },
+  
+  "scenes": {
+    "start": {
+      "id": "start",
+      "chapter": 1,
+      "location": "start",
+      "narrative": "故事从这里开始...",
+      "effects": { "flag": "started" },
+      "choices": [
+        { 
+          "text": "选项A",
+          "next": "scene_a",
+          "effects": { "flag": "chose_a" }
+        }
+      ]
+    }
+  }
+}
+      </pre>
+
+      <h4 style="color:var(--text-primary);margin:16px 0 8px">场景节点字段</h4>
+      <ul style="padding-left:20px">
+        <li><b>id</b> — 场景唯一标识</li>
+        <li><b>chapter</b> — 章节编号</li>
+        <li><b>location</b> — 对应locations中的id</li>
+        <li><b>narrative</b> — 叙事文本，支持{name}等变量</li>
+        <li><b>effects</b> — 进入场景时自动触发的效果</li>
+        <li><b>choices</b> — 玩家选项列表</li>
+        <li><b>combat</b> — 战斗配置（可选）</li>
+      </ul>
+
+      <h4 style="color:var(--text-primary);margin:16px 0 8px">选项字段</h4>
+      <ul style="padding-left:20px">
+        <li><b>text</b> — 选项文本</li>
+        <li><b>hint</b> — 选项提示（可选）</li>
+        <li><b>next</b> — 跳转到下一个场景id</li>
+        <li><b>effects</b> — 选择后触发的效果</li>
+        <li><b>conditions</b> — 选项出现条件（可选）</li>
+        <li><b>check</b> — 属性检定（可选）</li>
+        <li><b>combat</b> — 触发战斗（可选）</li>
+      </ul>
+
+      <h4 style="color:var(--text-primary);margin:16px 0 8px">效果字段 (effects)</h4>
+      <ul style="padding-left:20px">
+        <li><b>flag</b> — 添加标记</li>
+        <li><b>removeFlag</b> — 移除标记</li>
+        <li><b>hp</b> — 加减生命值</li>
+        <li><b>sp</b> — 加减灵力</li>
+        <li><b>exp</b> — 加减经验</li>
+        <li><b>item</b> — 获得物品</li>
+        <li><b>removeItem</b> — 失去物品</li>
+        <li><b>affection</b> — NPC好感度变更 {"NPC名": 数值}</li>
+        <li><b>location</b> — 切换地点</li>
+        <li><b>chapter</b> — 切换章节</li>
+      </ul>
+    </div>
+    <button class="btn btn-secondary btn-full" style="margin-top:16px" onclick="closeModalById('save-modal')">关闭</button>
+  `;
+  modal.style.display = 'flex';
+};
+
+window.deleteGame = async function(slug) {
+  if (!confirm(`确认删除模板 "${slug}"？此操作不可撤销。`)) return;
+  await App.deleteGame(slug);
+  navigate('creator');
+};
+</script>
 </body>
 </html>
