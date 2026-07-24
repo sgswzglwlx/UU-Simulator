@@ -814,15 +814,16 @@ const App = {
     const userMenu = document.getElementById('user-menu');
     const userName = document.getElementById('user-name-display');
     const navProfile = document.getElementById('nav-profile');
+    if (!loginBtn) return; // DOM not ready yet
     if (this.user) {
       loginBtn.style.display = 'none';
-      userMenu.style.display = 'block';
-      userName.textContent = this.user.nick || this.user.username;
-      navProfile.style.display = 'inline';
+      if (userMenu) userMenu.style.display = 'block';
+      if (userName) userName.textContent = this.user.nick || this.user.username;
+      if (navProfile) navProfile.style.display = 'inline';
     } else {
       loginBtn.style.display = 'inline-flex';
-      userMenu.style.display = 'none';
-      navProfile.style.display = 'none';
+      if (userMenu) userMenu.style.display = 'none';
+      if (navProfile) navProfile.style.display = 'none';
     }
   },
 
@@ -921,7 +922,9 @@ function showAuth() {
 
 function closeModal(e) {
   if (e && e.target !== e.currentTarget) return;
-  document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    if (m) m.style.display = 'none';
+  });
 }
 
 function closeModalById(id) {
