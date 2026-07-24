@@ -177,6 +177,9 @@ const Router = {
   async go(name, params = {}) {
     this.current = name;
     const main = document.getElementById('main-content');
+    // Hide loading screen
+    const loading = document.getElementById('page-loading');
+    if (loading) loading.style.display = 'none';
     // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     // Show or create page
